@@ -8,6 +8,5 @@ class ParserFactory:
     @staticmethod
     def get_instance() -> Parser:
         raise NotImplementedError(
-            "Method get_instance of ParserFactory"
-            + " not yet implemented"
+            "Method get_instance of ParserFactory" + " not yet implemented"
         )

@@ -8,6 +8,5 @@ class GeneratorFactory:
     @staticmethod
     def get_instance() -> Generator:
         raise NotImplementedError(
-            "Method get_instance of GeneratorFactory"
-            + " not implemented"
+            "Method get_instance of GeneratorFactory" + " not implemented"
         )

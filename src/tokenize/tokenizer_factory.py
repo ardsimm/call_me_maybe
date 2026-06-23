@@ -8,6 +8,5 @@ class TokenizerFactory:
     @staticmethod
     def get_instance() -> Tokenizer:
         raise NotImplementedError(
-            "Method get_instance of TokenizerFactory"
-            + " not yet implemented"
+            "Method get_instance of TokenizerFactory" + " not yet implemented"
         )

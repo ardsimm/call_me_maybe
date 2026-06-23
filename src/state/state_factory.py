@@ -8,6 +8,5 @@ class StateFactory:
     @staticmethod
     def get_instance() -> State:
         raise NotImplementedError(
-            "Method get_instance of StateFactory"
-            + " not yet implemented"
+            "Method get_instance of StateFactory" + " not yet implemented"
         )

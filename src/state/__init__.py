@@ -1,8 +1,4 @@
 from state import State
 from state_factory import StateFactory
 
-
-__all__ = [
-    "StateFactory",
-    "State"
-]
+__all__ = ["StateFactory", "State"]

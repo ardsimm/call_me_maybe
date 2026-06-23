@@ -8,6 +8,5 @@ class SchemaFactory:
     @staticmethod
     def get_instance() -> Schema:
         raise NotImplementedError(
-            "Method get_instance of SchemaFactory"
-            + " not yet implemented"
+            "Method get_instance of SchemaFactory" + " not yet implemented"
         )

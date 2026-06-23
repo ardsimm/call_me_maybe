@@ -15,10 +15,7 @@ class Node:
         if (
             next is None
             or not isinstance(next, List)
-            or any(
-                not isinstance(node, Node)
-                for node in next
-            )
+            or any(not isinstance(node, Node) for node in next)
         ):
             raise ValueError("Invalid type for next attribute")
         self.__next = next
@@ -29,11 +26,7 @@ class Node:
 
     @content.setter
     def content(self, content: str) -> None:
-        if (
-            content is None
-            or not isinstance(content, str)
-            or content == ""
-        ):
+        if content is None or not isinstance(content, str) or content == "":
             raise ValueError("Invalid type for content attribute")
         self.__content = content
 

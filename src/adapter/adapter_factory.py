@@ -9,6 +9,5 @@ class AdapterFactory:
     @staticmethod
     def get_instance(type: Any) -> Adapter:
         raise NotImplementedError(
-            "Method get_instance of AdapterFactory"
-            + " not yet implemented"
+            "Method get_instance of AdapterFactory" + " not yet implemented"
         )
