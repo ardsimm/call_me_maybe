@@ -21,5 +21,5 @@ class Generator(ABC):
         self._model = model
 
     @abstractmethod
-    def generate(histoy: List[str]) -> str:
+    def generate(self, histoy: List[str]) -> str:
         pass

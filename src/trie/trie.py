@@ -9,7 +9,7 @@ class Trie:
         return self.__root
 
     @root.setter
-    def root(self, root: Node):
+    def root(self, root: Node) -> None:
         if root is None or not isinstance(root, Node):
             raise ValueError("Invalid type for root attribute")
         self.__root = root

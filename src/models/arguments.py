@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class Argument(BaseModel):
+class Arguments(BaseModel):
     functions_definition: Optional[str] = Field(
         min_length=6, default="functions_definition.json"
     )
