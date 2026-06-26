@@ -1,5 +1,4 @@
-from generator import Generator
-
+from .generator import Generator
 
 class GeneratorFactory:
 
@@ -8,5 +7,6 @@ class GeneratorFactory:
     @staticmethod
     def get_instance() -> Generator:
         raise NotImplementedError(
-            "Method get_instance of GeneratorFactory" + " not implemented"
+            "Method get_instance of class"
+            + " GeneratorFactory not yet implemented."
         )

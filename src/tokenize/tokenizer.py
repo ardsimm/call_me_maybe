@@ -12,9 +12,5 @@ class Tokenizer(ABC):
         pass
 
     @abstractmethod
-    def __decode_one(data: Any) -> Any:
-        pass
-
-    @abstractmethod
     def decode(data: Any) -> Any:
         pass

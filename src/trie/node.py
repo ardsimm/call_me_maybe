@@ -4,7 +4,7 @@ from typing import List
 class Node:
 
     __next: List["Node"]
-    __content: str
+    __token_id: int
 
     @property
     def next(self) -> List["Node"]:
@@ -21,14 +21,14 @@ class Node:
         self.__next = next
 
     @property
-    def content(self) -> str:
-        return self.__content
+    def token_id(self) -> int:
+        return self.__token_id
 
-    @content.setter
-    def content(self, content: str) -> None:
-        if content is None or not isinstance(content, str) or content == "":
+    @token_id.setter
+    def content(self, token_id: int) -> None:
+        if token_id is None or not isinstance(token_id, int) or token_id < 0:
             raise ValueError("Invalid type for content attribute")
-        self.__content = content
+        self.__token_id = token_id
 
     def add_next(self, next_node: "Node") -> None:
         self.next.append(next_node)
