@@ -5,5 +5,5 @@ from typing import Any
 class Parser(ABC):
 
     @abstractmethod
-    def parse(self) -> Any:
+    def parse(self, source: Any) -> Any:
         pass
