@@ -1,4 +1,4 @@
-from adapter import Adapter
+from .adapter import Adapter
 from typing import Any
 
 
