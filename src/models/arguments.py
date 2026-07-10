@@ -1,12 +1,16 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    model_validator,
+)
 import json
 from src.adapter.adapter_factory import AdapterFactory
 from src.adapter.adapter_type import AdapterType
 
 
 class Arguments(BaseModel):
-    functions_definitions: str = Field(
-        min_length=6, default="data/input/functions_definitions.json"
+    functions_definition: str = Field(
+        min_length=6, default="data/input/functions_definition.json"
     )
     input: str = Field(
         min_length=6, default="data/input/function_calling_tests.json"
@@ -19,7 +23,7 @@ class Arguments(BaseModel):
         json_adapter = AdapterFactory.get_instance(AdapterType.JSON)
 
         with (
-            open(self.functions_definitions) as functions_definitions,
+            open(self.functions_definition) as functions_definitions,
             open(self.input) as input_file,
         ):
             try:

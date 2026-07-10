@@ -1,6 +1,5 @@
 from enum import Enum
-
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 from typing import List
 
 
@@ -18,11 +17,6 @@ class Argument(BaseModel):
 
 class Function(BaseModel):
     prompt: str = Field(min_length=1)
-    name: str = Field(min_length=4)
+    name: str = Field(min_length=1)
     arguments: List[Argument] = Field()
 
-    @model_validator(mode="after")
-    def validate_model(self) -> "Function":
-        if not self.name.startswith("fn_"):
-            raise ValueError('Function name must begin with "fn_"')
-        return self
