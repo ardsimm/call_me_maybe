@@ -14,11 +14,10 @@ class ArgumentParser(Parser):
 
         parser.add_argument(
             "--functions_definition",
-            help="The path to the JSON file containing functions definition"
+            help="The path to the JSON file containing functions definition",
         )
         parser.add_argument(
-            "--input",
-            help="The path to the JSON file containing the prompts"
+            "--input", help="The path to the JSON file containing the prompts"
         )
         parser.add_argument(
             "--output",
@@ -31,7 +30,7 @@ class ArgumentParser(Parser):
 
         parsed = parser.parse_args(source)
         if parsed.functions_definition is not None:
-            arguments.functions_definition = parsed.functions_definition
+            arguments.functions_definitions = parsed.functions_definition
         if parsed.input is not None:
             arguments.input = parsed.input
         if parsed.output is not None:
