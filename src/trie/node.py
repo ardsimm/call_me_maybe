@@ -25,7 +25,7 @@ class Node:
         return self.__token_id
 
     @token_id.setter
-    def content(self, token_id: int) -> None:
+    def token_id(self, token_id: int) -> None:
         if token_id is None or not isinstance(token_id, int) or token_id < 0:
             raise ValueError("Invalid type for content attribute")
         self.__token_id = token_id

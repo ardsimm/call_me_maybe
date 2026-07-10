@@ -1,12 +1,11 @@
-from parser import Parser
+from .parser import Parser
+from .__argument_parser import ArgumentParser
 
 
 class ParserFactory:
 
-    __parser_instance: Parser
+    __parser_instance: Parser = ArgumentParser()
 
     @staticmethod
     def get_instance() -> Parser:
-        raise NotImplementedError(
-            "Method get_instance of ParserFactory" + " not yet implemented"
-        )
+        return ParserFactory.__parser_instance

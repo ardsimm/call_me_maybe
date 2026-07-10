@@ -1,4 +1,4 @@
-from schema import Schema
+from .schema import Schema
 
 
 class SchemaFactory:

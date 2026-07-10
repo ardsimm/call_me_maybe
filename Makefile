@@ -5,15 +5,17 @@ $(VENV):
 
 install: $(VENV)
 
+re: fclean install
+
 run: install
 	uv run python -m src
 
 debug: install
-	uv run python -m pdb src
+	uv run python -m pdb src/__main__.py
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
-	rm -rf .mypy_cache
+	find . -type d -name .mypy_cache -exec rm -rf {} +
 
 fclean: clean
 	rm -rf .venv
@@ -30,4 +32,4 @@ lint-strict:
 	echo Running Mypy
 	mypy src --strict --exclude $(VENV) --exclude llm_sdk
 
-.phony: install run clean lint lint-strict
+.phony: install run clean lint lint-strict re

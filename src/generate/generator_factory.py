@@ -1,5 +1,6 @@
 from .generator import Generator
 
+
 class GeneratorFactory:
 
     __generator_instance: Generator
