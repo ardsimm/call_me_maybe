@@ -1,9 +1,0 @@
-[
-	{
-		"name": "fn_greet",
-		"description": "Greet the person passed as parameter",
-		"params": {
-			"a": "string"
-		}
-	}
-]
