@@ -5,9 +5,9 @@ from typing import List
 
 
 class ArgumentType(Enum):
-    INT = "int",
-    FLOAT = "float",
-    BOOL = "bool",
+    INT = ("int",)
+    FLOAT = ("float",)
+    BOOL = ("bool",)
     STRING = "string"
 
 
@@ -24,5 +24,5 @@ class Function(BaseModel):
     @model_validator(mode="after")
     def validate_model(self) -> "Function":
         if not self.name.startswith("fn_"):
-            raise ValueError("Function name must begin with \"fn_\"")
+            raise ValueError('Function name must begin with "fn_"')
         return self
