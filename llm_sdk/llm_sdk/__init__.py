@@ -104,6 +104,7 @@ class Small_LLM_Model:
             out = self._model(input_ids=input_tensor)
         # Get logits for the last token in the sequence for the batch (batch size 1)
         logits = out.logits[0, -1].tolist()
+        print(logits)
         return [float(x) for x in logits]
 
     def get_path_to_vocab_file(self) -> str:
