@@ -16,7 +16,6 @@ class Argument(BaseModel):
 
 
 class Function(BaseModel):
-    prompt: str = Field(min_length=1)
+    description: str = Field(min_length=1)
     name: str = Field(min_length=1)
     arguments: List[Argument] = Field()
-
