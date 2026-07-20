@@ -20,16 +20,24 @@ clean:
 fclean: clean
 	rm -rf .venv
 
-lint:
+flake8: install
 	echo Running Flake8
-	flake8 . --exclude=$(VENV),llm_sdk
-	echo Running Mypy
-	mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV)
+	uv run python -m flake8 . --excelude=$(venv),llm_sdk
 
-lint-strict:
-	echo Running Flake8
-	flake8 . --exclude=$(VENV),llm_sdk
+mypy: install
 	echo Running Mypy
-	mypy src --strict --exclude $(VENV) --exclude llm_sdk
+	uv run python -m mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV);
 
-.phony: install run clean lint lint-strict re
+lint: install
+	echo Running Flake8;
+	uv run python -m flake8 . --exclude=$(VENV),llm_sdk;
+	echo Running Mypy;
+	uv run python -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV);
+
+lint-strict: install
+	echo Running Flake8;
+	uv run python -m flake8 . --exclude=$(VENV),llm_sdk;
+	echo Running Mypy;
+	uv run python -m mypy . --strict --exclude $(VENV)
+
+.phony: install run clean lint lint-strict flake8 mypy re
