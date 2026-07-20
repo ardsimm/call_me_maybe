@@ -8,8 +8,9 @@ from traceback import print_exception
 
 def main() -> None:
     parser: Parser = ParserFactory.get_instance()
-    arguments: Arguments = parser.parse(sys.argv[1:])
     generator: Generator = GeneratorFactory.get_instance()
+    arguments: Arguments = parser.parse(sys.argv[1:])
+
     print(
         generator.get_next_item(
             prompt="What is the sum of 2 and 4 ?",
@@ -27,9 +28,25 @@ def main() -> None:
                     ],
                 ),
             ],
+        ),
+        generator.get_next_item(
+            prompt="Can greet my mom ? Her name is Pervenche.",
+            functions=[
+                Function(
+                    name="fn_add",
+                    description="Add two integers",
+                    arguments=[Argument(name="a", type=ArgumentType.INT)],
+                ),
+                Function(
+                    name="fn_greet",
+                    description="Greet someone",
+                    arguments=[
+                        Argument(name="name", type=ArgumentType.STRING)
+                    ],
+                ),
+            ],
         )
     )
-    print("Parser output: ", arguments)
 
 
 if __name__ == "__main__":
