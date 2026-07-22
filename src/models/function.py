@@ -1,18 +1,19 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 
 class ArgumentType(Enum):
-    INT = ("int",)
-    FLOAT = ("float",)
-    BOOL = ("bool",)
+    INT = "int",
+    FLOAT = "float",
+    BOOL = "bool",
     STRING = "string"
 
 
 class Argument(BaseModel):
     name: str = Field(min_length=1)
     type: ArgumentType = Field()
+    value: Optional[str] = None
 
 
 class Function(BaseModel):

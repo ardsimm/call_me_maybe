@@ -1,8 +1,8 @@
 from typing import TypedDict, List
-from .arguments import Arguments
+from .function import Argument
 
 
 class OutputItem(TypedDict):
     prompt: str
     name: str
-    arguments: List[Arguments]
+    arguments: List[Argument]
