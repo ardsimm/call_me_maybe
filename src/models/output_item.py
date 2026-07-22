@@ -4,5 +4,5 @@ from .arguments import Arguments
 
 class OutputItem(TypedDict):
     prompt: str
-    fn_name: str
+    name: str
     arguments: List[Arguments]

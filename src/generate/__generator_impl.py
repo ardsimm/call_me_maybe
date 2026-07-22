@@ -7,7 +7,10 @@ from functools import reduce
 
 class GeneratorImpl(Generator):
 
-    def __strip_completion(self, completion: str) -> str:
+    def __strip_completion(
+        self,
+        completion: str
+    ) -> str:
         name_length = len(completion)
         while completion.endswith((",", '"', "'", " ")):
             completion = completion[: name_length - 1]
@@ -17,7 +20,9 @@ class GeneratorImpl(Generator):
         return completion
 
     def __get_name(
-        self, prompt: str, functions: List[Function]
+        self,
+        prompt: str,
+        functions: List[Function]
     ) -> str:
         end_tokens: List[int] = self.tokenizer.encode('"').tolist()[0]
 
@@ -48,6 +53,7 @@ class GeneratorImpl(Generator):
         )
         valid_tokens = set(reduced_name_tokens)
         valid_tokens.update(end_tokens)
+
         while result[len(result) - 1] not in end_tokens:
             logits = self.model.get_logits_from_input_ids(result)
             max_logit_index = logits.index(max(logits))
@@ -57,12 +63,15 @@ class GeneratorImpl(Generator):
             print(self.model.decode([max_logit_index]), end="")
             result.append(max_logit_index)
         print("\n")
-        name = self.__strip_completion(
+        return self.__strip_completion(
             self.model.decode(result[initial_len - 1:])
         )
-        return name
 
-    def __get_arguments(self, prompt: str, function: Function) -> List[str]:
+    def __get_arguments(
+        self,
+        prompt: str,
+        function: Function
+    ) -> List[str]:
         raise NotImplementedError(
             "Method __get_arguments of GeneratorImpl" + " not yet implemented"
         )
@@ -70,6 +79,6 @@ class GeneratorImpl(Generator):
     def get_next_item(
         self, prompt: str, functions: List[Function]
     ) -> OutputItem:
-        item: OutputItem = {"prompt": prompt, "fn_name": "", "arguments": []}
-        item["fn_name"] = self.__get_name(prompt, functions)
+        item: OutputItem = {"prompt": prompt, "name": "", "arguments": []}
+        item["name"] = self.__get_name(prompt, functions)
         return item
