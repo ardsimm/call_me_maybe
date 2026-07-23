@@ -3,20 +3,20 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 
-class ArgumentType(Enum):
-    INT = "int",
-    FLOAT = "float",
-    BOOL = "bool",
+class ParameterType(Enum):
+    INT = ("int",)
+    FLOAT = ("float",)
+    BOOL = ("bool",)
     STRING = "string"
 
 
-class Argument(BaseModel):
+class Parameter(BaseModel):
     name: str = Field(min_length=1)
-    type: ArgumentType = Field()
+    type: ParameterType = Field()
     value: Optional[str] = None
 
 
 class Function(BaseModel):
     description: str = Field(min_length=1)
     name: str = Field(min_length=1)
-    arguments: List[Argument] = Field()
+    parameters: List[Parameter] = Field()

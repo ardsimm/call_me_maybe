@@ -1,171 +1,136 @@
-from src.generate.generation_error import GenerationError
-
 from .generator import Generator
-from ..models.function import Argument, ArgumentType, Function
-from typing import List, Dict
-from ..models.output_item import OutputItem
-from functools import reduce
+from ..models.function import Parameter, ParameterType, Function
+from typing import Any, Callable, List, Set
 
 
 class GeneratorImpl(Generator):
 
-    def __strip_completion(
-        self,
-        completion: str
-    ) -> str:
+    def __strip_completion(self, completion: str) -> str:
         name_length = len(completion)
-        while completion.endswith((",", '"', "'", " ", "}")):
+        while completion.endswith((",", '"', "'", " ", "}", "\n")):
             completion = completion[: name_length - 1]
             name_length -= 1
-        while completion.startswith((" ", '"', "'")):
+        while completion.startswith((" ", '"', "'", "\n")):
             completion = completion[1:]
         return completion
 
-    def __get_name(
+    def __get_completion(
         self,
         prompt: str,
-        functions: List[Function]
+        detect_end: Callable[[List[int], int], bool],
+        valid_tokens: Set[int] = set(),
     ) -> str:
-        print("\n====================")
-        print("====================\n")
-        print(f"Generating name for prompt: {prompt}")
-        print("\n====================")
-        print("====================\n")
+        result: List[int] = self.tokenizer.encode(prompt).tolist()[0]
+        initial_len = len(result)
+        result_len = initial_len
+        while initial_len == result_len or not detect_end(result, initial_len):
+            logits = self.model.get_logits_from_input_ids(result)
+            max_logit_index = logits.index(max(logits))
+            while len(valid_tokens) and max_logit_index not in valid_tokens:
+                logits[max_logit_index] = -1
+                max_logit_index = logits.index(max(logits))
+            result.append(max_logit_index)
+            result_len += 1
+        return self.tokenizer.decode(result[initial_len:])
+
+    def __flatten_list(self, list: List[List[Any]]) -> List[Any]:
+        flattened: List[Any] = []
+        for el in list:
+            flattened.extend(el)
+        return flattened
+
+    def generate_name(self, prompt: str, functions: List[Function]) -> str:
+        print("Generating name...")
 
         end_tokens: List[int] = self.tokenizer.encode('"').tolist()[0]
 
         prompt += "\nPick the function to run from the following options:\n\n"
-        prompt += "\n".join([
-            f" - {function.name}: {function.description}"
-            for function in functions
-        ])
+        prompt += "\n".join(
+            [
+                f" - {function.name}: {function.description}"
+                for function in functions
+            ]
+        )
         prompt += '\n\n {"function": { "name": "'
 
-        result: List[int] = self.tokenizer.encode(prompt)[0].tolist()
-        initial_len = len(result)
-        logits: List[float]
-
-        encoded_names = [
-            self.model.encode(function.name).tolist()[0]
-            for function in functions
-        ]
-        reduced_name_tokens: List[int] = reduce(
-            lambda acc, el: acc + el,
-            encoded_names,
-            []
+        valid_tokens = set()
+        valid_tokens.update(
+            self.__flatten_list(
+                [
+                    self.model.encode(function.name).tolist()[0]
+                    for function in functions
+                ]
+            )
         )
-        valid_tokens = set(reduced_name_tokens)
         valid_tokens.update(end_tokens)
-        print(prompt, end="")
-        while result[len(result) - 1] not in end_tokens:
-            logits = self.model.get_logits_from_input_ids(result)
-            max_logit_index = logits.index(max(logits))
-            while max_logit_index not in valid_tokens:
-                logits[max_logit_index] = -1
-                max_logit_index = logits.index(max(logits))
-            result.append(max_logit_index)
-            print(self.model.decode(max_logit_index), end="")
-        return self.__strip_completion(
-            self.model.decode(result[initial_len - 1:])
-        )
 
-    def __get_arguments(
-        self,
-        prompt: str,
-        function: Function
-    ) -> List[Argument]:
-        print("\n====================")
-        print("====================\n")
-        print(f"Generating arguments for prompt: {prompt}")
-        print("\n====================")
-        print("====================\n")
-        arguments: List[Argument] = []
+        def detect_name_end(tokens: List[int], _: int) -> bool:
+            return tokens[len(tokens) - 1] in end_tokens
+
+        result = self.__get_completion(prompt, detect_name_end, valid_tokens)
+        return self.__strip_completion(result)
+
+    def generate_parameters(
+        self, prompt: str, function: Function
+    ) -> List[Parameter]:
+        detect_end: Callable[[List[int], int], bool]
+
+        print("Generating parameters")
+
+        def detect_end(tokens: List[int], initial_len: int) -> bool:
+            return '"' in self.tokenizer.decode(tokens[initial_len:])
+
+        parameters: List[Parameter] = []
         prompt += "\nPick the parameters for this function:"
         prompt += f"{function.name}: {function.description}"
-        prompt += '\n {"function": { "name": "'
+        prompt += '\n{"function": { "name": "'
         prompt += f'{function.name}", "parameters: [\n'
-        for argument in function.arguments:
-            end_tokens: set[int]
-            valid_tokens: set[int]
-            prompt += "\n{"
-            prompt += f'"name": "{argument.name}",\n'
-            prompt += f'"type": "{argument.type.value}",\n'
-            prompt += '"value": '
-            if argument.type == ArgumentType.STRING:
-                prompt += '"'
-                end_tokens = set(self.tokenizer.encode('"').tolist()[0])
-                # Set valid_tokens to an empty set to allow any
-                valid_tokens = set()
-            elif argument.type == ArgumentType.BOOL:
-                end_tokens = set(self.tokenizer.encode(' ').tolist()[0])
-                end_tokens.update(self.tokenizer.encode('}').tolist()[0])
-                end_tokens.update(self.tokenizer.encode(',').tolist()[0])
-                valid_tokens = set(
-                    self.tokenizer.encode('truefalse01').tolist()[0]
+        for parameter in function.parameters:
+            prompt += "\n{\t" + f'"name": {parameter.name}",\n\t"type": "{
+                    parameter.type.value[0]
+                }",\n\t"value": "'
+            valid_tokens: Set[int] = set()
+
+            if parameter.type == ParameterType.INT:
+                valid_tokens.update(
+                    self.__flatten_list(
+                        [
+                            self.tokenizer.encode(char).tolist()[0]
+                            for char in '0123456789"'
+                        ]
+                    ),
                 )
-            elif argument.type == ArgumentType.INT:
-                end_tokens = set(self.tokenizer.encode(' ').tolist()[0])
-                end_tokens.update(self.tokenizer.encode(',').tolist()[0])
-                end_tokens.update(self.tokenizer.encode('}').tolist()[0])
-                valid_tokens = set(
-                    self.tokenizer.encode('0123456789').tolist()[0]
+            elif parameter.type == ParameterType.FLOAT:
+                valid_tokens.update(
+                    self.__flatten_list(
+                        [
+                            self.tokenizer.encode(char).tolist()[0]
+                            for char in '0123456789."'
+                        ]
+                    ),
                 )
-            elif argument.type == ArgumentType.FLOAT:
-                end_tokens = set(self.tokenizer.encode(' ').tolist()[0])
-                end_tokens.update(self.tokenizer.encode('}').tolist()[0])
-                end_tokens.update(self.tokenizer.encode(',').tolist()[0])
-                valid_tokens = set(
-                    self.tokenizer.encode('.0123456789').tolist()[0]
+            elif parameter.type == ParameterType.BOOL:
+                valid_tokens.update(
+                    self.__flatten_list(
+                        [
+                            self.tokenizer.encode(char).tolist()[0]
+                            for char in '01"'
+                        ]
+                    ),
                 )
-            if len(valid_tokens):
-                valid_tokens.update(end_tokens)
-            result: List[int] = self.tokenizer.encode(prompt)[0].tolist()
-            initial_len = len(prompt)
-            print(prompt, end="")
-            while (
-                len(result) != initial_len
-                and result[len(result) - 1] not in end_tokens
-            ):
-                logits = self.model.get_logits_from_input_ids(result)
-                max_logit_index = logits.index(max(logits))
-                while (
-                    len(valid_tokens)
-                    and max_logit_index not in valid_tokens
-                ):
-                    logits[max_logit_index] = -1
-                    max_logit_index = logits.index(max(logits))
-                result.append(max_logit_index)
-                print(self.model.decode([max_logit_index]), end="")
-            arguments.append(
-                Argument(
-                    name=argument.name,
-                    type=argument.type,
-                    value=self.model.decode(result[initial_len - 1:])
+
+            result = self.__get_completion(
+                prompt=prompt,
+                valid_tokens=valid_tokens,
+                detect_end=detect_end,
+            )
+            prompt += result + '"\n},'
+            parameters.append(
+                Parameter(
+                    name=parameter.name,
+                    type=parameter.type,
+                    value=self.__strip_completion(result),
                 )
             )
-        return arguments
 
-    def get_next_item(
-        self,
-        prompt: str,
-        functions: List[Function]
-    ) -> OutputItem:
-        item: OutputItem = {"prompt": prompt, "name": "", "arguments": []}
-        item["name"] = self.__get_name(prompt, functions)
-        matching_functions = [
-            function
-            for function in functions
-            if function.name == item["name"]
-        ]
-        if not len(matching_functions):
-            raise GenerationError(f"Generated name {item["name"]} invalid.")
-        function = matching_functions[0]
-        arguments = self.__get_arguments(prompt, function)
-        item["arguments"] = arguments
-        print("\n====================")
-        print("====================")
-        print("Result:")
-        print(item)
-        print("====================")
-        print("====================\n")
-        return item
+        return parameters

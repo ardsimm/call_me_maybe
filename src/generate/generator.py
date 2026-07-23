@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from llm_sdk import Small_LLM_Model
-from ..tokenize import Tokenizer
-from ..models import OutputItem, Function
+
+from src.tokenize import Tokenizer
+from src.models import Function, Parameter
 from typing import List
 
 
@@ -35,7 +36,11 @@ class Generator(ABC):
         self.__tokenizer = tokenizer
 
     @abstractmethod
-    def get_next_item(
-        self, prompt: str, functions: List[Function]
-    ) -> OutputItem:
+    def generate_name(self, prompt: str, functions: List[Function]) -> str:
+        pass
+
+    @abstractmethod
+    def generate_parameters(
+        self, prompt: str, function: Function
+    ) -> List[Parameter]:
         pass

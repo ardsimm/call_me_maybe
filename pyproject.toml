@@ -5,6 +5,8 @@ description = "Generating perfect function calling json using constraint decodin
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "accelerate>=1.14.0", # TODO: Remove before push to vogsphere
+    "black>=26.5.1",
     "flake8>=7.3.0",
     "llm-sdk",
     "mypy>=2.2.0",
