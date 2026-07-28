@@ -1,12 +1,17 @@
-from .state import State
+from src.state.__float_state import FloatState
+from src.state.__int_state import IntState
+from src.state.__string_state import StringState
+from . import State, StateType
 
 
 class StateFactory:
 
-    __state_instance: State
-
     @staticmethod
-    def get_instance() -> State:
-        raise NotImplementedError(
-            "Method get_instance of StateFactory" + " not yet implemented"
-        )
+    def get_instance(type: StateType) -> State:
+        if type == StateType.STRING_STATE:
+            return StringState()
+        if type == StateType.INT_STATE:
+            return IntState()
+        if type == StateType.FLOAT_STATE:
+            return FloatState()
+        raise ValueError(f"Invalid state type {type}")
