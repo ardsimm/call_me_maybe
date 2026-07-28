@@ -1,6 +1,6 @@
 VENV ?= .venv
 
-$(VENV):
+$(VENV): pyproject.toml
 	uv sync
 
 install: $(VENV)
@@ -20,16 +20,23 @@ clean:
 fclean: clean
 	rm -rf .venv
 
-lint:
+flake8: install
 	echo Running Flake8
-	flake8 . --exclude=$(VENV),llm_sdk
-	echo Running Mypy
-	mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV)
+	uv run python -m flake8 . --exclude=$(VENV),llm_sdk
 
-lint-strict:
-	echo Running Flake8
-	flake8 . --exclude=$(VENV),llm_sdk
+mypy: install
 	echo Running Mypy
-	mypy src --strict --exclude $(VENV) --exclude llm_sdk
+	uv run python -m mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV);
 
-.phony: install run clean lint lint-strict re
+lint: install flake8 mypy
+
+mypy-strict: install
+	echo Running Mypy
+	uv run python -m mypy . --strict --exclude $(VENV)
+
+lint-strict: flake8 mypy-strict
+
+black: install
+	uv run python -m black --line-length 79 src
+
+.phony: install re run debug clean fclean flake8 mypy lint mypy-strict lint-strict black

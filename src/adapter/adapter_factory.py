@@ -14,5 +14,4 @@ class AdapterFactory:
             if cls.__json_adapter_instance is None:
                 cls.__json_adapter_instance = JSONAdapter()
             return cls.__json_adapter_instance
-        else:
-            raise ValueError(f"Invalid adapter type {type.name}")
+        raise ValueError(f"Invalid adapter type {type.name}")

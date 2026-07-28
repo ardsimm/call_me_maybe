@@ -4,7 +4,7 @@ from src.parsing.parsing_validation_error import ParsingValidationError
 
 from .parser import Parser
 from typing import List
-from src.models.arguments import Arguments
+from src.models import Arguments
 from argparse import ArgumentParser as _ArgumentParser
 
 
