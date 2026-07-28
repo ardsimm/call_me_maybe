@@ -73,8 +73,6 @@ class GeneratorImpl(Generator):
     def generate_parameters(
         self, prompt: str, function: Function
     ) -> List[Parameter]:
-        detect_end: Callable[[List[int], int], bool]
-
         print("Generating parameters")
 
         def detect_end(tokens: List[int], initial_len: int) -> bool:
