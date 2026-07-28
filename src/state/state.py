@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import Dict, List, Optional
-
 from llm_sdk import Small_LLM_Model
-
 from src.tokenize.tokenizer import Tokenizer
 from src.tokenize.tokenizer_factory import TokenizerFactory
 from src.tokenize.tokenizer_type import TokenizerType

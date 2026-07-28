@@ -1,5 +1,4 @@
-from src.state.state import StateStage
-from . import State
+from .state import StateStage, State
 
 
 class IntStateStage(StateStage):

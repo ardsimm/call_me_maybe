@@ -1,7 +1,8 @@
-from src.state.__float_state import FloatState
-from src.state.__int_state import IntState
-from src.state.__string_state import StringState
-from . import State, StateType
+from .__float_state import FloatState
+from .__int_state import IntState
+from .__string_state import StringState
+from .state import State
+from .state_type import StateType
 
 
 class StateFactory:
