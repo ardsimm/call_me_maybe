@@ -1,29 +1,36 @@
-from typing import List
+from typing import List, Optional
 
 from . import Constrainer
 
 
 class GenericConstrainer(Constrainer):
 
-    def constrain_tokens(
+    def constrain_logits(
         self,
-        tokens: List[int],
-    ) -> List[int]:
+        logits: List[float],
+    ) -> List[float]:
         allowed_tokens = self.state.get_allowed_tokens()
+        if allowed_tokens is not None and not len(allowed_tokens):
+            return logits
         if allowed_tokens is None:
-            return []
-        elif not len(allowed_tokens):
-            return tokens
-        return [
-            token
-            for token in tokens
-            if token in allowed_tokens
-        ]
+            allowed_tokens = []
+        i = 0
+        constrained_logits: List[float] = []
+        for logit in logits:
+            if i in allowed_tokens:
+                constrained_logits.append(logit)
+            else:
+                constrained_logits.append(-1)
+            i += 1
+        return constrained_logits
 
     def pick_token(
         self,
         logits: List[float]
-    ) -> int:
+    ) -> Optional[int]:
+        max_logit = max(logits)
+        if max_logit == -1:
+            return None
         max_token_id = logits.index(max(logits))
         self.state.update_last_token(max_token_id)
         return max_token_id

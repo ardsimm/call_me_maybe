@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict, List, Optional
-from llm_sdk import Small_LLM_Model
+from src.model.model_wrapper import ModelWrapper
 from src.tokenize.tokenizer import Tokenizer
 from src.tokenize.tokenizer_factory import TokenizerFactory
 from src.tokenize.tokenizer_type import TokenizerType
@@ -13,14 +13,14 @@ class StateStage(Enum):
 class State:
 
     _stages: List[StateStage]
-    __current_stage_idx: int
     _tokenizer: Tokenizer
     _stage_allowed_tokens: Dict[StateStage, Optional[List[int]]]
     _stage_transition_tokens: Dict[StateStage, List[int]]
+    __current_stage_idx: int
 
     def __init__(self) -> None:
         self._tokenizer = TokenizerFactory.get_instance(
-            TokenizerType.DEFAULT, Small_LLM_Model()
+            TokenizerType.DEFAULT, ModelWrapper.get_instance()
         )
         self.__current_stage_idx = 0
 

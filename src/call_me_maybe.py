@@ -9,7 +9,8 @@ class CallMeMaybe:
     def run() -> None:
         prompts = [
             "What is the sum of 2 and 4 ?",
-            "Can greet my mom ? Her name is Anna.",
+            "Can you greet my mom ? Her name is Pervenche.",
+            "Can you greet my mom ?"
         ]
         functions: List[Function] = [
             Function(
@@ -41,7 +42,7 @@ class CallMeMaybe:
                 sep="\n",
             )
             name = generator.generate_name(prompt, functions)
-            print("Generated name:", name)
+            print(f"Generated name: [{name}]")
             picked_function = [
                 function for function in functions if function.name == name
             ][0]

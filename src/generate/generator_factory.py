@@ -1,5 +1,5 @@
-from llm_sdk import Small_LLM_Model
 from src.generate.__generator_impl import GeneratorImpl
+from src.model.model_wrapper import ModelWrapper
 from .generator import Generator
 from src.tokenize import TokenizerFactory, TokenizerType
 from typing import Optional
@@ -12,7 +12,7 @@ class GeneratorFactory:
     @classmethod
     def get_instance(cls) -> Generator:
         if cls.__generator_instance is None:
-            model = Small_LLM_Model()
+            model = ModelWrapper.get_instance()
             cls.__generator_instance = GeneratorImpl(
                 model,
                 TokenizerFactory.get_instance(TokenizerType.DEFAULT, model),

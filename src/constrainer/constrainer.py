@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from src.state.state import State
 
 
@@ -15,15 +15,15 @@ class Constrainer(ABC):
         return self.__state
 
     @abstractmethod
-    def constrain_tokens(
+    def constrain_logits(
         self,
-        tokens: List[int],
-    ) -> List[int]:
+        tokens: List[float],
+    ) -> List[float]:
         pass
 
     @abstractmethod
     def pick_token(
         self,
         logits: List[float]
-    ) -> int:
+    ) -> Optional[int]:
         pass
