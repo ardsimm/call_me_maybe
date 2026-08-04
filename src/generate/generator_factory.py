@@ -1,8 +1,8 @@
-from src.generate.__generator_impl import GeneratorImpl
-from src.model.model_wrapper import ModelWrapper
-from .generator import Generator
+from src.model.model import Model
 from src.tokenize import TokenizerFactory, TokenizerType
 from typing import Optional
+from .generator import Generator
+from .__generator_impl import GeneratorImpl
 
 
 class GeneratorFactory:
@@ -12,7 +12,7 @@ class GeneratorFactory:
     @classmethod
     def get_instance(cls) -> Generator:
         if cls.__generator_instance is None:
-            model = ModelWrapper.get_instance()
+            model = Model.get_instance()
             cls.__generator_instance = GeneratorImpl(
                 model,
                 TokenizerFactory.get_instance(TokenizerType.DEFAULT, model),

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from llm_sdk import Small_LLM_Model
+from src.model import Model
 
 from src.tokenize import Tokenizer
 from src.models import Function, Parameter
@@ -8,20 +8,20 @@ from typing import List
 
 class Generator(ABC):
 
-    __model: Small_LLM_Model
+    __model: Model
     __tokenizer: Tokenizer
 
-    def __init__(self, model: Small_LLM_Model, tokenizer: Tokenizer) -> None:
+    def __init__(self, model: Model, tokenizer: Tokenizer) -> None:
         self.__model = model
         self.__tokenizer = tokenizer
 
     @property
-    def model(self) -> Small_LLM_Model:
+    def model(self) -> Model:
         return self.__model
 
     @model.setter
-    def model(self, model: Small_LLM_Model) -> None:
-        if model is None or not isinstance(model, Small_LLM_Model):
+    def model(self, model: Model) -> None:
+        if model is None or not isinstance(model, Model):
             raise ValueError("Invalid type for model attribute")
         self.__model = model
 

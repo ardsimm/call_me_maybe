@@ -1,6 +1,6 @@
 from .tokenizer import Tokenizer
 from typing import Optional
-from llm_sdk import Small_LLM_Model
+from src.model import Model
 from .tokenizer_type import TokenizerType
 from .__default_tokenizer import DefaultTokenizer
 
@@ -11,7 +11,7 @@ class TokenizerFactory:
 
     @classmethod
     def get_instance(
-        cls, type: TokenizerType, model: Small_LLM_Model
+        cls, type: TokenizerType, model: Model
     ) -> Tokenizer:
         if type == TokenizerType.DEFAULT:
             if cls.__default_tokenizer_instance is None:

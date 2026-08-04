@@ -1,6 +1,7 @@
 from typing import List
 
 from src.generate import Generator, GeneratorFactory
+from src.generate.generation_error import GenerationError
 from src.models.function import Function, Parameter, ParameterType
 
 
@@ -43,9 +44,12 @@ class CallMeMaybe:
             )
             name = generator.generate_name(prompt, functions)
             print(f"Generated name: [{name}]")
-            picked_function = [
+            filtered_functions = [
                 function for function in functions if function.name == name
-            ][0]
+            ]
+            if not len(filtered_functions):
+                raise GenerationError(f"Invalid function name: [{name}]")
+            picked_function = filtered_functions[0]
             parameters = generator.generate_parameters(prompt, picked_function)
             print("Generated parameters:")
             for parameter in parameters:

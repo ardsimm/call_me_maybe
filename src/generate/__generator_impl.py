@@ -1,12 +1,10 @@
 from src.constrainer.constrainer import Constrainer
 from src.constrainer.constrainer_factory import ConstrainerFactory
-from src.constrainer.constrainer_type import ConstrainerType
 from src.state.state_factory import StateFactory
 from src.state.state_type import StateType
-
-from .generator import Generator
-from ..models.function import Parameter, ParameterType, Function
+from src.models.function import Parameter, ParameterType, Function
 from typing import List, Optional
+from .generator import Generator
 
 
 class GeneratorImpl(Generator):
@@ -58,8 +56,10 @@ class GeneratorImpl(Generator):
         result = self.__get_completion(
             prompt=prompt,
             constrainer=ConstrainerFactory.get_instance(
-                type=ConstrainerType.GENERIC,
-                state=StateFactory.get_instance(StateType.STRING_STATE)
+                StateFactory.get_trie_state_instance([
+                    self.tokenizer.encode(function.name).tolist()[0]
+                    for function in functions
+                ])
             )
         )
         return self.__strip_completion(result)
@@ -92,7 +92,6 @@ class GeneratorImpl(Generator):
             result = self.__get_completion(
                 prompt=prompt,
                 constrainer=ConstrainerFactory.get_instance(
-                    ConstrainerType.GENERIC,
                     StateFactory.get_instance(state_type)
                 )
             )

@@ -1,3 +1,3 @@
-from .model_wrapper import ModelWrapper
+from .model import Model
 
-__all__ = ["ModelWrapper"]
+__all__ = ["Model"]

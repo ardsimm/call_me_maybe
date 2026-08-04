@@ -1,3 +1,6 @@
+from functools import reduce
+from typing import List
+
 from .state import StateStage, State
 
 
@@ -18,18 +21,11 @@ class IntState(State):
             IntStateStage.DATA,
             IntStateStage.TERMINAL,
         ]
-        digits_tokens = (
-            self._tokenizer.encode("0")
-            .tolist()[0]
-            .extend(self._tokenizer.encode("1").tolist()[0])
-            .extend(self._tokenizer.encode("2").tolist()[0])
-            .extend(self._tokenizer.encode("3").tolist()[0])
-            .extend(self._tokenizer.encode("4").tolist()[0])
-            .extend(self._tokenizer.encode("5").tolist()[0])
-            .extend(self._tokenizer.encode("6").tolist()[0])
-            .extend(self._tokenizer.encode("7").tolist()[0])
-            .extend(self._tokenizer.encode("8").tolist()[0])
-            .extend(self._tokenizer.encode("9").tolist()[0])
+        digits_tokens: List[int] = reduce(
+            lambda ac, el: ac + el, [
+                self._tokenizer.encode(char).tolist()[0]
+                for char in "0123456789"
+            ], []
         )
 
         self._stage_allowed_tokens = {

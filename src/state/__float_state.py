@@ -1,3 +1,4 @@
+from functools import reduce
 from typing import List
 
 from .state import StateStage, State
@@ -22,39 +23,36 @@ class FloatState(State):
             FloatStateStage.POST_FLOAT_POINT,
             FloatStateStage.TERMINAL,
         ]
-        initial_tokens: List[int] = self._tokenizer.encode("0").tolist()[0]
-        initial_tokens.extend(self._tokenizer.encode("1").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("2").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("3").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("4").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("5").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("6").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("7").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("8").tolist()[0])
-        initial_tokens.extend(self._tokenizer.encode("9").tolist()[0])
+
+        digits_tokens: List[int] = reduce(
+            lambda ac, el: ac + el, [
+                self._tokenizer.encode(char).tolist()[0]
+                for char in "0123456789"
+            ], []
+        )
 
         pre_float_point_tokens = []
-        pre_float_point_tokens.extend(initial_tokens)
+        pre_float_point_tokens.extend(digits_tokens)
         pre_float_point_tokens.extend(self._tokenizer.encode(".").tolist()[0])
 
         post_float_point_tokens = []
-        post_float_point_tokens.extend(initial_tokens)
+        post_float_point_tokens.extend(digits_tokens)
         post_float_point_tokens.extend(self._tokenizer.encode('"').tolist()[0])
 
         self._stage_allowed_tokens = {
-            FloatStateStage.INITIAL: initial_tokens,
+            FloatStateStage.INITIAL: digits_tokens,
             FloatStateStage.PRE_FLOAT_POINT: pre_float_point_tokens,
-            FloatStateStage.FLOAT_POINT: initial_tokens,
+            FloatStateStage.FLOAT_POINT: digits_tokens,
             FloatStateStage.POST_FLOAT_POINT: post_float_point_tokens,
             FloatStateStage.TERMINAL: None,
         }
 
         self._stage_transition_tokens = {
-            FloatStateStage.INITIAL: initial_tokens,
+            FloatStateStage.INITIAL: digits_tokens,
             FloatStateStage.PRE_FLOAT_POINT: self._tokenizer.encode(
                 "."
             ).tolist()[0],
-            FloatStateStage.FLOAT_POINT: initial_tokens,
+            FloatStateStage.FLOAT_POINT: digits_tokens,
             FloatStateStage.POST_FLOAT_POINT: self._tokenizer.encode(
                 '"'
             ).tolist()[0],

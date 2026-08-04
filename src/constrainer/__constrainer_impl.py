@@ -3,7 +3,7 @@ from typing import List, Optional
 from . import Constrainer
 
 
-class GenericConstrainer(Constrainer):
+class ConstrainerImpl(Constrainer):
 
     def constrain_logits(
         self,
@@ -31,6 +31,6 @@ class GenericConstrainer(Constrainer):
         max_logit = max(logits)
         if max_logit == -1:
             return None
-        max_token_id = logits.index(max(logits))
+        max_token_id = logits.index(max_logit)
         self.state.update_last_token(max_token_id)
         return max_token_id
