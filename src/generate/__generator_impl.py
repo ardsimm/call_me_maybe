@@ -1,6 +1,10 @@
+from src.constrainer.constrainer import Constrainer
+from src.constrainer.constrainer_factory import ConstrainerFactory
+from src.state.state_factory import StateFactory
+from src.state.state_type import StateType
+from src.models.function import Parameter, ParameterType, Function
+from typing import List, Optional
 from .generator import Generator
-from ..models.function import Parameter, ParameterType, Function
-from typing import Any, Callable, List, Set
 
 
 class GeneratorImpl(Generator):
@@ -14,35 +18,31 @@ class GeneratorImpl(Generator):
             completion = completion[1:]
         return completion
 
+    def __get_next_token(
+            self,
+            result: List[int],
+            constrainer: Constrainer
+    ) -> Optional[int]:
+        logits = self.model.get_logits_from_input_ids(result)
+        constrained_logits = constrainer.constrain_logits(logits)
+        token = constrainer.pick_token(constrained_logits)
+        return token
+
     def __get_completion(
         self,
         prompt: str,
-        detect_end: Callable[[List[int], int], bool],
-        valid_tokens: Set[int] = set(),
+        constrainer: Constrainer
     ) -> str:
         result: List[int] = self.tokenizer.encode(prompt).tolist()[0]
         initial_len = len(result)
-        result_len = initial_len
-        while initial_len == result_len or not detect_end(result, initial_len):
-            logits = self.model.get_logits_from_input_ids(result)
-            max_logit_index = logits.index(max(logits))
-            while len(valid_tokens) and max_logit_index not in valid_tokens:
-                logits[max_logit_index] = -1
-                max_logit_index = logits.index(max(logits))
-            result.append(max_logit_index)
-            result_len += 1
+        token = self.__get_next_token(result, constrainer)
+        while token is not None:
+            result.append(token)
+            token = self.__get_next_token(result, constrainer)
         return self.tokenizer.decode(result[initial_len:])
-
-    def __flatten_list(self, list: List[List[Any]]) -> List[Any]:
-        flattened: List[Any] = []
-        for el in list:
-            flattened.extend(el)
-        return flattened
 
     def generate_name(self, prompt: str, functions: List[Function]) -> str:
         print("Generating name...")
-
-        end_tokens: List[int] = self.tokenizer.encode('"').tolist()[0]
 
         prompt += "\nPick the function to run from the following options:\n\n"
         prompt += "\n".join(
@@ -53,21 +53,15 @@ class GeneratorImpl(Generator):
         )
         prompt += '\n\n {"function": { "name": "'
 
-        valid_tokens = set()
-        valid_tokens.update(
-            self.__flatten_list(
-                [
-                    self.model.encode(function.name).tolist()[0]
+        result = self.__get_completion(
+            prompt=prompt,
+            constrainer=ConstrainerFactory.get_instance(
+                StateFactory.get_trie_state_instance([
+                    self.tokenizer.encode(function.name).tolist()[0]
                     for function in functions
-                ]
+                ])
             )
         )
-        valid_tokens.update(end_tokens)
-
-        def detect_name_end(tokens: List[int], _: int) -> bool:
-            return tokens[len(tokens) - 1] in end_tokens
-
-        result = self.__get_completion(prompt, detect_name_end, valid_tokens)
         return self.__strip_completion(result)
 
     def generate_parameters(
@@ -75,52 +69,31 @@ class GeneratorImpl(Generator):
     ) -> List[Parameter]:
         print("Generating parameters")
 
-        def detect_end(tokens: List[int], initial_len: int) -> bool:
-            return '"' in self.tokenizer.decode(tokens[initial_len:])
-
         parameters: List[Parameter] = []
         prompt += "\nPick the parameters for this function:"
         prompt += f"{function.name}: {function.description}"
         prompt += '\n{"function": { "name": "'
         prompt += f'{function.name}", "parameters: [\n'
         for parameter in function.parameters:
+            state_type: StateType
             prompt += "\n{\t" + f'"name": {parameter.name}",\n\t"type": "{
-                    parameter.type.value[0]
+                    parameter.type.value
                 }",\n\t"value": "'
-            valid_tokens: Set[int] = set()
 
+            if parameter.type == ParameterType.STRING:
+                state_type = StateType.STRING_STATE
             if parameter.type == ParameterType.INT:
-                valid_tokens.update(
-                    self.__flatten_list(
-                        [
-                            self.tokenizer.encode(char).tolist()[0]
-                            for char in '0123456789"'
-                        ]
-                    ),
-                )
+                state_type = StateType.INT_STATE
             elif parameter.type == ParameterType.FLOAT:
-                valid_tokens.update(
-                    self.__flatten_list(
-                        [
-                            self.tokenizer.encode(char).tolist()[0]
-                            for char in '0123456789."'
-                        ]
-                    ),
-                )
+                state_type = StateType.FLOAT_STATE
             elif parameter.type == ParameterType.BOOL:
-                valid_tokens.update(
-                    self.__flatten_list(
-                        [
-                            self.tokenizer.encode(char).tolist()[0]
-                            for char in '01"'
-                        ]
-                    ),
-                )
+                raise ValueError("Parameter type bool not yet supported")
 
             result = self.__get_completion(
                 prompt=prompt,
-                valid_tokens=valid_tokens,
-                detect_end=detect_end,
+                constrainer=ConstrainerFactory.get_instance(
+                    StateFactory.get_instance(state_type)
+                )
             )
             prompt += result + '"\n},'
             parameters.append(

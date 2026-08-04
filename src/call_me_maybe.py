@@ -1,6 +1,7 @@
 from typing import List
 
 from src.generate import Generator, GeneratorFactory
+from src.generate.generation_error import GenerationError
 from src.models.function import Function, Parameter, ParameterType
 
 
@@ -9,7 +10,8 @@ class CallMeMaybe:
     def run() -> None:
         prompts = [
             "What is the sum of 2 and 4 ?",
-            "Can greet my mom ? Her name is Anna.",
+            "Can you greet my mom ? Her name is Pervenche.",
+            "Can you greet my mom ?"
         ]
         functions: List[Function] = [
             Function(
@@ -41,10 +43,13 @@ class CallMeMaybe:
                 sep="\n",
             )
             name = generator.generate_name(prompt, functions)
-            print("Generated name:", name)
-            picked_function = [
+            print(f"Generated name: [{name}]")
+            filtered_functions = [
                 function for function in functions if function.name == name
-            ][0]
+            ]
+            if not len(filtered_functions):
+                raise GenerationError(f"Invalid function name: [{name}]")
+            picked_function = filtered_functions[0]
             parameters = generator.generate_parameters(prompt, picked_function)
             print("Generated parameters:")
             for parameter in parameters:

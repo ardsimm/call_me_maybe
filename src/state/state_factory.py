@@ -1,7 +1,12 @@
-from src.state.__float_state import FloatState
-from src.state.__int_state import IntState
-from src.state.__string_state import StringState
-from . import State, StateType
+from typing import List
+
+from src.state.trie_state import TrieState
+
+from .__float_state import FloatState
+from .__int_state import IntState
+from .__string_state import StringState
+from .state import State
+from .state_type import StateType
 
 
 class StateFactory:
@@ -14,4 +19,12 @@ class StateFactory:
             return IntState()
         if type == StateType.FLOAT_STATE:
             return FloatState()
+        if type == StateType.TRIE_STATE:
+            return TrieState()
         raise ValueError(f"Invalid state type {type}")
+
+    @staticmethod
+    def get_trie_state_instance(words: List[List[int]]) -> TrieState:
+        state = TrieState()
+        state.init_trie_state(words)
+        return state

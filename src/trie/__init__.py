@@ -1,4 +1,3 @@
-from .node import Node
-from .trie import Trie
+from .trie import Trie, TrieNode
 
-__all__ = ["Node", "Trie"]
+__all__ = ["TrieNode", "Trie"]
