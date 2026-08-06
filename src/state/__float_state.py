@@ -1,6 +1,6 @@
 from functools import reduce
 from typing import List
-
+from src.model import Model
 from .state import StateStage, State
 
 
@@ -37,7 +37,7 @@ class FloatState(State):
 
         post_float_point_tokens = []
         post_float_point_tokens.extend(digits_tokens)
-        post_float_point_tokens.extend(self._tokenizer.encode('"').tolist()[0])
+        post_float_point_tokens.extend(Model.get_instance().string_end_sequences)
 
         self._stage_allowed_tokens = {
             FloatStateStage.INITIAL: digits_tokens,
@@ -53,7 +53,5 @@ class FloatState(State):
                 "."
             ).tolist()[0],
             FloatStateStage.FLOAT_POINT: digits_tokens,
-            FloatStateStage.POST_FLOAT_POINT: self._tokenizer.encode(
-                '"'
-            ).tolist()[0],
+            FloatStateStage.POST_FLOAT_POINT: Model.get_instance().string_end_sequences,
         }

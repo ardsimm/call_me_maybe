@@ -28,6 +28,6 @@ class TrieState(State):
         next_node = self.__current_node.get(token)
         if next_node is None:
             raise GenerationError(f"A forbidden token was picked: {token} ({
-                self._tokenizer.decode(token)
+                self._tokenizer.decode([token])
             })")
         self.__current_node = next_node

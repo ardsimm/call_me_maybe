@@ -26,6 +26,11 @@ class GeneratorImpl(Generator):
         logits = self.model.get_logits_from_input_ids(result)
         constrained_logits = constrainer.constrain_logits(logits)
         token = constrainer.pick_token(constrained_logits)
+        if token is not None:
+            print(
+                f"Max logit: {max(constrained_logits)},", 
+                f"token: [{self.tokenizer.decode([token])}]"
+            )
         return token
 
     def __get_completion(
@@ -76,8 +81,11 @@ class GeneratorImpl(Generator):
         prompt += f'{function.name}", "parameters: [\n'
         for parameter in function.parameters:
             state_type: StateType
+            parameter_type = parameter.type.value
+            if parameter.type == ParameterType.FLOAT:
+                parameter_type = "float"
             prompt += "\n{\t" + f'"name": {parameter.name}",\n\t"type": "{
-                    parameter.type.value
+                    parameter_type
                 }",\n\t"value": "'
 
             if parameter.type == ParameterType.STRING:

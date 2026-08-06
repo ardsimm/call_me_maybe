@@ -27,6 +27,7 @@ class Model(Small_LLM_Model):
     def string_end_sequences(self) -> List[int]:
         if self.__string_end_sequences is None:
             self.__load_string_end_sequences()
+        assert self.__string_end_sequences is not None
         return self.__string_end_sequences
 
     @classmethod
