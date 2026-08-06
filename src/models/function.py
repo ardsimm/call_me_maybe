@@ -1,12 +1,12 @@
-from enum import Enum
+from enum import StrEnum
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
 
-class ParameterType(Enum):
-    INT = ("int",)
-    FLOAT = ("float",)
-    BOOL = ("bool",)
+class ParameterType(StrEnum):
+    INT = "int"
+    FLOAT = "number"
+    BOOL = "bool"
     STRING = "string"
 
 
