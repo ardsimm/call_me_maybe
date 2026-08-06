@@ -1,6 +1,6 @@
 from functools import reduce
 from typing import List
-
+from src.model import Model
 from .state import StateStage, State
 
 
@@ -31,12 +31,12 @@ class IntState(State):
         self._stage_allowed_tokens = {
             IntStateStage.INITIAL: digits_tokens,
             IntStateStage.DATA: digits_tokens.extend(
-                self._tokenizer.encode('"').tolist()[0]
+                Model.get_instance().string_end_sequences
             ),
             IntStateStage.TERMINAL: None,
         }
 
         self._stage_transition_tokens = {
             IntStateStage.INITIAL: digits_tokens,
-            IntStateStage.DATA: self._tokenizer.encode('"').tolist()[0],
+            IntStateStage.DATA: Model.get_instance().string_end_sequences,
         }
