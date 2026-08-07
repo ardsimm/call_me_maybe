@@ -61,7 +61,7 @@ class Small_LLM_Model:
         # --- load tokenizer & model -------------------------------------------------
         self._tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
             model_name, trust_remote_code=trust_remote_code
-        )   # type: ignore
+        )  # type: ignore
         if self._tokenizer.pad_token_id is None:
             # ensure we have a pad token to keep batch helpers happy
             self._tokenizer.pad_token_id = self._tokenizer.eos_token_id
@@ -72,8 +72,8 @@ class Small_LLM_Model:
             device_map="auto" if self._device == "cuda" else None,
             trust_remote_code=trust_remote_code,
         )
-        self._model.to(self._device)   # type: ignore
-        self._model.eval()   # type: ignore
+        self._model.to(self._device)  # type: ignore
+        self._model.eval()  # type: ignore
 
         # switch to inference-only mode
         for p in self._model.parameters():

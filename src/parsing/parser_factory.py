@@ -12,4 +12,4 @@ class ParserFactory:
     def get_instance(cls) -> Parser:
         if cls.__parser_instance is None:
             cls.__parser_instance = ArgumentParser()
-        return ParserFactory.__parser_instance
+        return cls.__parser_instance

@@ -14,7 +14,7 @@ class TrieState(State):
         super().__init__()
         self.__trie = Trie()
 
-    def init_trie_state(self, words: List[List[int]]):
+    def init_trie_state(self, words: List[List[int]]) -> None:
         self.__trie.init_trie(words)
         self.__current_node = self.__trie.root
 

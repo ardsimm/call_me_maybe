@@ -2,7 +2,6 @@ from typing import Dict, List
 
 from src.model.model import Model
 
-
 TrieNode = Dict[int, "TrieNode"]
 
 

@@ -1,8 +1,5 @@
-from typing import List
-
-from src.generate import Generator, GeneratorFactory
+from src.generate import GeneratorFactory
 from src.generate.generation_error import GenerationError
-from src.models.function import Function, Parameter, ParameterType
 from src.parsing import ParserFactory, Parser
 from src.models import Arguments, Context
 import sys
@@ -30,7 +27,9 @@ class CallMeMaybe:
             name = generator.generate_name(prompt, context.functions)
             print(f"Generated name: [{name}]")
             filtered_functions = [
-                function for function in context.functions if function.name == name
+                function
+                for function in context.functions
+                if function.name == name
             ]
             if not len(filtered_functions):
                 raise GenerationError(f"Invalid function name: [{name}]")

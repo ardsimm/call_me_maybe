@@ -3,8 +3,8 @@ from .state import StateStage, State
 
 
 class StringStateStage(StateStage):
-    INITIAL = 0,
-    DATA = 1,
+    INITIAL = (0,)
+    DATA = (1,)
     TERMINAL = 2
 
 
