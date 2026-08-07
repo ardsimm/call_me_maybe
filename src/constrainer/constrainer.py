@@ -22,8 +22,5 @@ class Constrainer(ABC):
         pass
 
     @abstractmethod
-    def pick_token(
-        self,
-        logits: List[float]
-    ) -> Optional[int]:
+    def pick_token(self, logits: List[float]) -> Optional[int]:
         pass

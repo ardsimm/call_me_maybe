@@ -25,10 +25,12 @@ class FloatState(State):
         ]
 
         digits_tokens: List[int] = reduce(
-            lambda ac, el: ac + el, [
+            lambda ac, el: ac + el,
+            [
                 self._tokenizer.encode(char).tolist()[0]
                 for char in "0123456789"
-            ], []
+            ],
+            [],
         )
 
         pre_float_point_tokens = []
@@ -37,7 +39,9 @@ class FloatState(State):
 
         post_float_point_tokens = []
         post_float_point_tokens.extend(digits_tokens)
-        post_float_point_tokens.extend(Model.get_instance().string_end_sequences)
+        post_float_point_tokens.extend(
+            Model.get_instance().string_end_sequences
+        )
 
         self._stage_allowed_tokens = {
             FloatStateStage.INITIAL: digits_tokens,
@@ -53,5 +57,7 @@ class FloatState(State):
                 "."
             ).tolist()[0],
             FloatStateStage.FLOAT_POINT: digits_tokens,
-            FloatStateStage.POST_FLOAT_POINT: Model.get_instance().string_end_sequences,
+            FloatStateStage.POST_FLOAT_POINT: (
+                Model.get_instance().string_end_sequences
+            ),
         }

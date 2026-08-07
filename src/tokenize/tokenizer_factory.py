@@ -10,9 +10,7 @@ class TokenizerFactory:
     __default_tokenizer_instance: Optional[DefaultTokenizer] = None
 
     @classmethod
-    def get_instance(
-        cls, type: TokenizerType, model: Model
-    ) -> Tokenizer:
+    def get_instance(cls, type: TokenizerType, model: Model) -> Tokenizer:
         if type == TokenizerType.DEFAULT:
             if cls.__default_tokenizer_instance is None:
                 cls.__default_tokenizer_instance = DefaultTokenizer(model)

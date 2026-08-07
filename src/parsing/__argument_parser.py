@@ -18,21 +18,20 @@ class ArgumentParser(Parser):
         parser.add_argument(
             "--functions_definition",
             help="The path to the JSON file containing functions definition",
-            default=None
+            default=None,
         )
         parser.add_argument(
-            "--input", help="The path to the JSON file containing the prompts",
-            default=None
+            "--input",
+            help="The path to the JSON file containing the prompts",
+            default=None,
         )
         parser.add_argument(
             "--output",
             help="The path to the JSON file to write the output of the LLM",
-            default=None
+            default=None,
         )
         parser.add_argument(
-            "--model",
-            help="The model to use for the generation",
-            default=None
+            "--model", help="The model to use for the generation", default=None
         )
 
         try:

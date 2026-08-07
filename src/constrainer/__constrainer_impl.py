@@ -24,10 +24,7 @@ class ConstrainerImpl(Constrainer):
             i += 1
         return constrained_logits
 
-    def pick_token(
-        self,
-        logits: List[float]
-    ) -> Optional[int]:
+    def pick_token(self, logits: List[float]) -> Optional[int]:
         max_logit = max(logits)
         if max_logit == -1:
             return None

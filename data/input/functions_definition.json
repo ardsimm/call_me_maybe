@@ -67,5 +67,17 @@
     "returns": {
       "type": "string"
     }
+  },
+  {
+    "name": "fn_bool_to_int",
+    "description": "Converts a boolean value to an int",
+    "parameters": {
+      "value": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
   }
 ]

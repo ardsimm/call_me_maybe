@@ -6,7 +6,7 @@ from typing import List, Optional
 class ParameterType(StrEnum):
     INT = "int"
     FLOAT = "number"
-    BOOL = "bool"
+    BOOL = "boolean"
     STRING = "string"
 
 
