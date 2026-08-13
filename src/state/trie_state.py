@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from src.generate.generation_error import GenerationError
+from src.generate.generator_exceptions import GenerationError
 from src.state.state import State
 from src.trie.trie import Trie, TrieNode
 

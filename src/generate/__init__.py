@@ -1,5 +1,5 @@
 from .generator_factory import GeneratorFactory
 from .generator import Generator
-from .generation_error import GenerationError
+from .generator_exceptions import GenerationError
 
 __all__ = ["GeneratorFactory", "Generator", "GenerationError"]

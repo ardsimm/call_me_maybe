@@ -1,7 +1,5 @@
 from pydantic import ValidationError
-
-from src.parsing.parsing_validation_error import ParsingValidationError
-
+from src.parsing.parser_exceptions import ParsingError, ParsingValidationError
 from .parser import Parser
 from typing import List
 from src.models import Arguments
@@ -49,5 +47,5 @@ class ArgumentParser(Parser):
             validation_errors = e.errors()
             raise ParsingValidationError(validation_errors)
         except Exception as e:
-            raise ValueError(f"Parsing error {e}")
+            raise ParsingError(f"Parsing error {e}")
         return arguments

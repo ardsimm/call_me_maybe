@@ -1,6 +1,9 @@
 from typing import List
-
 from pydantic_core import ErrorDetails
+
+
+class ParsingError(Exception):
+    pass
 
 
 class ParsingValidationError(ValueError):
