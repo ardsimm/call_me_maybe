@@ -1,8 +1,9 @@
 from src.constrainer.constrainer import Constrainer
 from src.constrainer.constrainer_factory import ConstrainerFactory
-from src.state import StateFactory, StateType
+from src.state import StateFactory, StateType, State
 from src.models.function import Parameter, ParameterType, Function
-from typing import List, Optional
+from .generator_exceptions import GenerationError
+from typing import List, Optional, Callable, Union
 from .generator import Generator
 
 
@@ -77,12 +78,16 @@ class GeneratorImpl(Generator):
                     parameter_type
                 }",\n\t"value": "'
 
-            if parameter.type == ParameterType.STRING:
-                state = StateFactory.get_instance(StateType.STRING_STATE)
+            value_parser: Optional[
+                Callable[[str], Union[int, float, bool]]
+            ] = None
+            state: State = StateFactory.get_instance(StateType.STRING_STATE)
             if parameter.type == ParameterType.INT:
                 state = StateFactory.get_instance(StateType.INT_STATE)
+                value_parser = int
             elif parameter.type == ParameterType.FLOAT:
                 state = StateFactory.get_instance(StateType.FLOAT_STATE)
+                value_parser = float
             elif parameter.type == ParameterType.BOOL:
                 state = StateFactory.get_trie_state_instance(
                     [
@@ -90,17 +95,27 @@ class GeneratorImpl(Generator):
                         for value in ["true", "false"]
                     ]
                 )
+                value_parser = bool
 
             result = self.__get_completion(
                 prompt=prompt,
                 constrainer=ConstrainerFactory.get_instance(state),
             )
             prompt += result + '"\n},'
+            stripped_result = self.__strip_completion(result)
+            if value_parser is not None:
+                try:
+                    value_parser(stripped_result)
+                except ValueError:
+                    raise GenerationError(
+                        "Invalid value for parameter of type",
+                        f"{parameter.type}: {stripped_result}",
+                    )
             parameters.append(
                 Parameter(
                     name=parameter.name,
                     type=parameter.type,
-                    value=self.__strip_completion(result),
+                    value=stripped_result,
                 )
             )
 

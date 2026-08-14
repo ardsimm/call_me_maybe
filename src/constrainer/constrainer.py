@@ -17,7 +17,7 @@ class Constrainer(ABC):
     @abstractmethod
     def constrain_logits(
         self,
-        tokens: List[float],
+        logits: List[float],
     ) -> List[float]:
         pass
 

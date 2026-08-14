@@ -1,3 +1,7 @@
+from src.adapter.adapter_exceptions import (
+    DeserializationException,
+    SerializationException,
+)
 from .adapter import Adapter
 import json
 
@@ -5,7 +9,17 @@ import json
 class JSONAdapter(Adapter):
 
     def serialize(self, value: object) -> str:
-        return json.dumps(value)
+        dump: str
+        try:
+            dump = json.dumps(value)
+        except json.JSONDecodeError as e:
+            raise SerializationException(e)
+        return dump
 
     def parse(self, data: str) -> object:
-        return json.loads(data)
+        load: object
+        try:
+            load = json.loads(data)
+        except json.JSONDecodeError as e:
+            raise DeserializationException(e)
+        return load

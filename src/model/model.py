@@ -2,7 +2,8 @@ import json
 import re
 from typing import Dict, List, Optional
 from llm_sdk import Small_LLM_Model
-from src.generate.generation_error import GenerationError
+from src.adapter.adapter_exceptions import DeserializationException
+from src.generate.generator_exceptions import GenerationError
 
 
 class Model(Small_LLM_Model):
@@ -18,10 +19,15 @@ class Model(Small_LLM_Model):
             for key, token_id in vocab_dict.items():
                 if re.search(r'(?<!\\)"', key):
                     self.__string_end_sequences.append(token_id)
-        except FileNotFoundError as e:
+        except IOError as e:
             raise GenerationError(f"Failed to open vocab file: {e}")
-        except json.JSONDecodeError as e:
+        except DeserializationException as e:
             raise GenerationError(f"Failed to parse vocab file: {e}")
+        except Exception as e:
+            raise GenerationError(
+                "An unknown error occured while loading "
+                + f" string end sequences: {e}"
+            )
 
     @property
     def string_end_sequences(self) -> List[int]:
