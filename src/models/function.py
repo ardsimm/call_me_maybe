@@ -13,7 +13,7 @@ class ParameterType(StrEnum):
 class Parameter(BaseModel):
     name: str = Field(min_length=1)
     type: ParameterType = Field()
-    value: Optional[str] = None
+    value: Optional[str] = Field(default=None)
 
 
 class Function(BaseModel):
