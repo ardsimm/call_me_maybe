@@ -27,7 +27,7 @@ class CallMeMaybe:
         item["prompt"] = prompt
 
         print(
-            "=====================================================",
+            "\n=====================================================",
             "=====================================================",
             f"Generating for prompt: {prompt}",
             "=====================================================",
@@ -82,7 +82,7 @@ class CallMeMaybe:
     @staticmethod
     def __write_output(items: List[OutputItem], arguments: Arguments) -> None:
         adapter = AdapterFactory.get_instance(AdapterType.JSON)
-        print("Writing result to output file...")
+        print("\nWriting result to output file...")
         serialized = adapter.serialize(items)
         os.makedirs("data/output", exist_ok=True)
         with open(
@@ -107,4 +107,4 @@ class CallMeMaybe:
         except IOError as e:
             print(f"Failed to write output file: {e}")
             return
-        print("Done ! :3")
+        print("\nDone ! :3")

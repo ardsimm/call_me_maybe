@@ -34,28 +34,16 @@ class GeneratorImpl(Generator):
         )
 
     def __get_completion(self, prompt: str, constrainer: Constrainer) -> str:
-        print(
-            "Getting completion for prompt:",
-            prompt,
-            "---------------",
-            sep="\n",
-        )
         result: List[int] = self.tokenizer.encode(prompt).tolist()[0]
         initial_len = len(result)
         token = self.__get_next_token(result, constrainer)
         while token is not None:
-            print("Generated:", self.model.decode([token]))
             result.append(token)
             token = self.__get_next_token(result, constrainer)
         return self.tokenizer.decode(result[initial_len:])
 
     def generate_name(self, prompt: str, functions: List[Function]) -> str:
-        print(
-            "------------------",
-            "Generating name...",
-            "------------------",
-            sep="\n",
-        )
+        print("Generating name...")
 
         prompt = Prompting.build_name_generation_prompt(prompt, functions)
 
@@ -75,12 +63,7 @@ class GeneratorImpl(Generator):
     def generate_parameters(
         self, prompt: str, function: Function
     ) -> List[Parameter]:
-        print(
-            "---------------------",
-            "Generating parameters",
-            "---------------------",
-            sep="\n",
-        )
+        print("Generating parameters...")
 
         parameters: List[Parameter] = []
         user_prompt = prompt
