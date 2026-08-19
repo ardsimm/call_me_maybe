@@ -9,6 +9,17 @@ import sys
 import os
 
 
+header = r"""           _ _                                              _
+  ___ __ _| | |    _ __ ___   ___     _ __ ___   __ _ _   _| |__   ___
+ / __/ _` | | |   | '_ ` _ \ / _ \   | '_ ` _ \ / _` | | | | '_ \ / _ \
+| (_| (_| | | |   | | | | | |  __/   | | | | | | (_| | |_| | |_) |  __/
+ \___\__,_|_|_|___|_| |_| |_|\___|___|_| |_| |_|\__,_|\__, |_.__/ \___|
+             |_____|            |_____|               |___/
+
+Made with love and pain by ardsimm
+"""
+
+
 class CallMeMaybe:
 
     @staticmethod
@@ -92,6 +103,7 @@ class CallMeMaybe:
 
     @classmethod
     def run(cls) -> None:
+        print(header)
         try:
             arguments: Arguments = cls.__get_arguments()
         except (ParsingValidationError, ParsingError):
