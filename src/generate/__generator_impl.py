@@ -1,5 +1,6 @@
 from src.constrainer.constrainer import Constrainer
 from src.constrainer.constrainer_factory import ConstrainerFactory
+from src.prompting.prompting import Prompting
 from src.state import StateFactory, StateType, State
 from src.models.function import Parameter, ParameterType, Function
 from .generator_exceptions import GenerationError
@@ -11,7 +12,7 @@ class GeneratorImpl(Generator):
 
     def __strip_completion(self, completion: str) -> str:
         name_length = len(completion)
-        while completion.endswith((",", '"', "'", " ", "}", "\n")):
+        while completion.endswith((",", '"', "'", " ", "}", "\n", ")")):
             completion = completion[: name_length - 1]
             name_length -= 1
         while completion.startswith((" ", '"', "'", "\n")):
@@ -27,25 +28,30 @@ class GeneratorImpl(Generator):
         return token
 
     def __get_completion(self, prompt: str, constrainer: Constrainer) -> str:
+        print(
+            "Getting completion for prompt:",
+            prompt,
+            "---------------",
+            sep="\n",
+        )
         result: List[int] = self.tokenizer.encode(prompt).tolist()[0]
         initial_len = len(result)
         token = self.__get_next_token(result, constrainer)
         while token is not None:
+            print("Generated:", self.model.decode([token]))
             result.append(token)
             token = self.__get_next_token(result, constrainer)
         return self.tokenizer.decode(result[initial_len:])
 
     def generate_name(self, prompt: str, functions: List[Function]) -> str:
-        print("Generating name...")
-
-        prompt += "\nPick the function to run from the following options:\n\n"
-        prompt += "\n".join(
-            [
-                f" - {function.name}: {function.description}"
-                for function in functions
-            ]
+        print(
+            "------------------",
+            "Generating name...",
+            "------------------",
+            sep="\n",
         )
-        prompt += '\n\n {"function": { "name": "'
+
+        prompt = Prompting.build_name_generation_prompt(prompt, functions)
 
         result = self.__get_completion(
             prompt=prompt,
@@ -63,21 +69,24 @@ class GeneratorImpl(Generator):
     def generate_parameters(
         self, prompt: str, function: Function
     ) -> List[Parameter]:
-        print("Generating parameters")
+        print(
+            "---------------------",
+            "Generating parameters",
+            "---------------------",
+            sep="\n",
+        )
 
         parameters: List[Parameter] = []
-        prompt += "\nPick the parameters for this function:"
-        prompt += f"{function.name}: {function.description}"
-        prompt += '\n{"function": { "name": "'
-        prompt += f'{function.name}", "parameters: [\n'
+        user_prompt = prompt
+        last_parameter: Optional[Parameter] = None
+        prompt = Prompting.build_parameter_generation_prompt(
+            user_prompt, function
+        )
         for parameter in function.parameters:
-            parameter_type = parameter.type.value
-            if parameter.type == ParameterType.FLOAT:
-                parameter_type = "float"
-            prompt += "\n{\t" + f'"name": {parameter.name}",\n\t"type": "{
-                    parameter_type
-                }",\n\t"value": "'
-
+            parameter.value = None
+            prompt = Prompting.build_next_parameter_generation_prompt(
+                prompt, function, parameter, last_parameter
+            )
             value_parser: Optional[
                 Callable[[str], Union[int, float, bool]]
             ] = None
@@ -101,22 +110,19 @@ class GeneratorImpl(Generator):
                 prompt=prompt,
                 constrainer=ConstrainerFactory.get_instance(state),
             )
-            prompt += result + '"\n},'
             stripped_result = self.__strip_completion(result)
             if value_parser is not None:
                 try:
                     value_parser(stripped_result)
                 except ValueError:
                     raise GenerationError(
-                        "Invalid value for parameter of type",
-                        f"{parameter.type}: {stripped_result}",
+                        "Invalid value for parameter of type"
+                        + f" {parameter.type.value}: {stripped_result}",
                     )
-            parameters.append(
-                Parameter(
-                    name=parameter.name,
-                    type=parameter.type,
-                    value=stripped_result,
-                )
+            parameter.value = stripped_result
+            last_parameter = Parameter(
+                name=parameter.name, type=parameter.type, value=parameter.value
             )
+            parameters.append(last_parameter)
 
         return parameters

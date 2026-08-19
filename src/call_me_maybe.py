@@ -38,9 +38,7 @@ class CallMeMaybe:
         name = generator.generate_name(prompt, context.functions)
 
         filtered_functions = [
-            function
-            for function in context.functions
-            if function.name == name
+            function for function in context.functions if function.name == name
         ]
         if not len(filtered_functions):
             raise GenerationError(f"Invalid function name: [{name}]")
@@ -48,9 +46,7 @@ class CallMeMaybe:
 
         picked_function = filtered_functions[0]
         item["name"] = picked_function.name
-        parameters = generator.generate_parameters(
-            prompt, picked_function
-        )
+        parameters = generator.generate_parameters(prompt, picked_function)
         print("Generated parameters:")
         for parameter in parameters:
             print(
