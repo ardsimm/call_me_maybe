@@ -67,19 +67,14 @@ class PromptingTemplates:
     def get_function_name_template(
         cls, user_prompt: str, functions: List[Function]
     ) -> str:
-        function_name_main_template = cls.__get_templates().get(
+        function_name_main_template = str(cls.__get_templates().get(
             FunctionNamesTemplates.FUNCTION_NAME_MAIN
-        )
+        ))
         function_options_template = str(
             cls.__get_templates().get(
                 FunctionNamesTemplates.FUNCTION_NAME_OPTIONS
             )
         )
-        if (
-            function_name_main_template is None
-            or function_options_template is None
-        ):
-            raise GenerationError("Missing function names template")
         function_options: str = "\n".join(
             [
                 function_options_template.replace(
@@ -96,17 +91,12 @@ class PromptingTemplates:
     def get_function_parameters_template(
         cls, user_prompt: str, function: Function
     ) -> str:
-        function_parameter_main_template = cls.__get_templates().get(
+        function_parameter_main_template = str(cls.__get_templates().get(
             FunctionParametersTemplates.FUNCTION_PARAMETERS_MAIN
-        )
-        function_parameter_option_template = cls.__get_templates().get(
+        ))
+        function_parameter_option_template = str(cls.__get_templates().get(
             FunctionParametersTemplates.FUNCTION_PARAMETER_OPTION
-        )
-        if (
-            function_parameter_main_template is None
-            or function_parameter_option_template is None
-        ):
-            raise GenerationError("Missing function parameters template")
+        ))
         parameter_options = "\n".join(
             [
                 function_parameter_option_template.replace(
@@ -139,19 +129,16 @@ class PromptingTemplates:
         next_parameter: Parameter,
         generated_parameter: Optional[Parameter] = None,
     ) -> str:
-        generated_parameter_template = cls.__get_templates().get(
+        generated_parameter_template = str(cls.__get_templates().get(
             FunctionParametersTemplates.GENERATED_PARAMETER_TEMPLATE
-        )
-        ungenerated_parameter_template = cls.__get_templates().get(
-                    FunctionParametersTemplates.UNGENERATED_PARAMETER_TEMPLATE
-                )
+        ))
+        ungenerated_parameter_template = str(cls.__get_templates().get(
+            FunctionParametersTemplates.UNGENERATED_PARAMETER_TEMPLATE
+        ))
         if (
-            generated_parameter_template is None
-            or ungenerated_parameter_template is None
+            generated_parameter is not None
+            and generated_parameter.value is not None
         ):
-            raise GenerationError("Missing function parameter template")
-        if generated_parameter is not None:
-            assert generated_parameter.value is not None
             current_prompt += (
                 generated_parameter_template
                 .replace("{[PARAMETER_VALUE]}", generated_parameter.value)
