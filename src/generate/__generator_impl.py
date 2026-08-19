@@ -22,10 +22,9 @@ class GeneratorImpl(Generator):
     def __get_next_token(
         self, result: List[int], constrainer: Constrainer
     ) -> Optional[int]:
-        logits = self.model.get_logits_from_input_ids(result)
-        constrained_logits = constrainer.constrain_logits(logits)
-        token = constrainer.pick_token(constrained_logits)
-        return token
+        return constrainer.pick_token(
+            self.model.get_logits_from_input_ids(result)
+        )
 
     def __get_completion(self, prompt: str, constrainer: Constrainer) -> str:
         print(

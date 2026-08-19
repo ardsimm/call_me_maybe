@@ -15,12 +15,8 @@ class Constrainer(ABC):
         return self.__state
 
     @abstractmethod
-    def constrain_logits(
+    def pick_token(
         self,
         logits: List[float],
-    ) -> List[float]:
-        pass
-
-    @abstractmethod
-    def pick_token(self, logits: List[float]) -> Optional[int]:
+    ) -> Optional[int]:
         pass
