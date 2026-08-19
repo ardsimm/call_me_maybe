@@ -10,14 +10,21 @@ from .generator import Generator
 
 class GeneratorImpl(Generator):
 
+    def __find_unescapted_quote_idx(self, s: str) -> int:
+        idx = 0
+        escape_count = 0
+        for char in s:
+            if char == "\\":
+                escape_count += 1
+            if char == "\"" and not escape_count % 2:
+                return idx
+            elif char == "\"":
+                escape_count = 0
+            idx += 1
+        return -1
+
     def __strip_completion(self, completion: str) -> str:
-        name_length = len(completion)
-        while completion.endswith((",", '"', "'", " ", "}", "\n", ")")):
-            completion = completion[: name_length - 1]
-            name_length -= 1
-        while completion.startswith((" ", '"', "'", "\n")):
-            completion = completion[1:]
-        return completion
+        return completion[:self.__find_unescapted_quote_idx(completion)]
 
     def __get_next_token(
         self, result: List[int], constrainer: Constrainer
