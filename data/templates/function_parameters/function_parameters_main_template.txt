@@ -13,56 +13,8 @@ Rules:
 - Do not invent information that is not supported by the request or the function.
 - Return only the parameter value. Do not explain your reasoning.
 - Return the semantic value itself, not a serialized or escaped representation.
+- NEVER escape characters in your answer, ALWAYS write RAW values
 
-Examples:
-
-User: Greet john
-Parameter: name
-Value: "john"
-
-User: What is the sum of 2 and 3?
-Parameter: a
-Value: 2
-
-User: What is the sum of 2 and 3?
-Parameter: b
-Value: 3
-
-User: Convert true to an int
-Parameter: value
-Value: true
-
-User: Use an asterisk as the replacement.
-Parameter: replacement
-Value: "*"
-
-User: Replace every numbers with X.
-Parameter: regex
-Value: "\d+"
-Parameter: replacement
-Value: "X"
-
-User: Replace all vowels with X.
-Parameter: regex
-Value: "[aeiouAEIOU]"
-Parameter: replacement
-Value: "X"
-
-User: Replace spaces with underscores.
-Parameter: regex
-Value: "\s+"
-Parameter: replacement
-Value: "_"
-
-User: Turn the lights off.
-Parameter: active
-Value: false
-
-User: Send a message to my mom saying "Hi mom !"
-Parameter: target
-Value: "mom"
-Parameter: message
-Value: "Hi mom !"
 <|im_end|>
 
 <|im_start|>user
