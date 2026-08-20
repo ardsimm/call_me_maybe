@@ -69,15 +69,48 @@
     }
   },
   {
-    "name": "fn_bool_to_int",
-    "description": "Converts a boolean value to an int",
+    "name": "fn_send_message",
+    "description": "Send a text message to a recipient",
     "parameters": {
-      "value": {
+      "message": {
+        "type": "string"
+      },
+      "recipient": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "name": "fn_control_lights",
+    "description": "Control the lights in a given room",
+    "parameters": {
+      "room": {
+        "type": "string"
+      },
+      "powered": {
         "type": "boolean"
       }
-    },
-    "returns": {
-      "type": "int"
+    }
+  },
+  {
+    "name": "fn_control_temperature",
+    "description": "Change the temperature in a given room",
+    "parameters": {
+      "room": {
+        "type": "string"
+      },
+      "temperature": {
+        "type": "number"
+      }
+    }
+  },
+  {
+    "name": "fn_call_taxi",
+    "description": "Call a taxi to a given location",
+    "parameters": {
+      "location": {
+        "type": "string"
+      }
     }
   }
 ]

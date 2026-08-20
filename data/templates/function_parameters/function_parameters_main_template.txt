@@ -11,9 +11,6 @@ Rules:
 - Use the function description to understand the purpose of the current parameter.
 - Match the information in the request to the correct parameter.
 - Do not invent information that is not supported by the request or the function.
-- Return only the parameter value. Do not explain your reasoning.
-- Return the semantic value itself, not a serialized or escaped representation.
-- NEVER escape characters in your answer, ALWAYS write RAW values
 
 <|im_end|>
 

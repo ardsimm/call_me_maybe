@@ -1,12 +1,12 @@
 [
   {
-    "prompt": "Convert true to an int"
-  },
-  {
     "prompt": "What is the sum of 2 and 3?"
   },
   {
     "prompt": "What is the sum of 265 and 345?"
+  },
+  {
+    "prompt": "What is the sum of 25094385347592875928529084565 and 345298347529457298346572837456238765?"
   },
   {
     "prompt": "Greet shrek"
@@ -34,5 +34,44 @@
   },
   {
     "prompt": "Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'"
+  },
+  {
+    "prompt": "Send a message to my mom saying \"Hi mom !\""
+  },
+  {
+    "prompt": "Send a message to Lucas saying \"WAZAAAA\""
+  },
+  {
+    "prompt": "Say hi to my mom in a text message"
+  },
+  {
+    "prompt": "Tell Lucas to get some eggs"
+  },
+  {
+    "prompt": "Turn off the lights in the kitchen"
+  },
+  {
+    "prompt": "Turn on the lights in the kitchen"
+  },
+  {
+    "prompt": "Let there be light in the garage !"
+  },
+  {
+    "prompt": "Set the mood in the living room."
+  },
+  {
+    "prompt": "Set the temperature to 42C in the kitchen"
+  },
+  {
+    "prompt": "Make it really cold in the kitchen"
+  },
+  {
+    "prompt": "Make it really hot in the kitchen"
+  },
+  {
+    "prompt": "Call a taxi to 24 Lenin street, Stalingrad"
+  },
+  {
+    "prompt": "I live at 42 avenue de Paris, Lyon. Can you call me a taxi ?"
   }
 ]
