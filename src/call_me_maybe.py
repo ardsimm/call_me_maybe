@@ -106,10 +106,10 @@ class CallMeMaybe:
         print(header)
         try:
             arguments: Arguments = cls.__get_arguments()
-        except (ParsingValidationError, ParsingError):
-            print("Parsing failed")
+            context = cls.__get_context(arguments)
+        except (ParsingValidationError, ParsingError) as e:
+            print(f"Parsing failed: {e}")
             return
-        context = cls.__get_context(arguments)
         items: List[OutputItem] = cls.__process_prompts(context)
         try:
             cls.__write_output(items, arguments)

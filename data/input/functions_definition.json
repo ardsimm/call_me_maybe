@@ -78,6 +78,9 @@
       "recipient": {
         "type": "string"
       }
+    },
+    "returns": {
+      "type": "int"
     }
   },
   {
@@ -90,6 +93,9 @@
       "powered": {
         "type": "boolean"
       }
+    },
+    "returns": {
+      "type": "int"
     }
   },
   {
@@ -102,6 +108,9 @@
       "temperature": {
         "type": "number"
       }
+    },
+    "returns": {
+      "type": "int"
     }
   },
   {
@@ -111,6 +120,9 @@
       "location": {
         "type": "string"
       }
+    },
+    "returns": {
+      "type": "int"
     }
   }
 ]
