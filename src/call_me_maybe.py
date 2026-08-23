@@ -6,7 +6,7 @@ from src.adapter import AdapterFactory, AdapterType, SerializationException
 from src.parsing import ParsingError, ParsingValidationError
 from typing import List, Union
 import sys
-import os
+from pathlib import Path
 
 
 header = r"""           _ _                                              _
@@ -100,9 +100,10 @@ class CallMeMaybe:
         adapter = AdapterFactory.get_instance(AdapterType.JSON)
         print("\nWriting result to output file...")
         serialized = adapter.serialize(items)
-        os.makedirs("data/output", exist_ok=True)
+        output_file_path = Path(arguments.output)
+        output_file_path.parent.mkdir(exist_ok=True, parents=True)
         with open(
-            os.path.join("data/output", arguments.output), mode="w"
+            output_file_path, mode="w"
         ) as output_file:
             output_file.write(serialized)
 
