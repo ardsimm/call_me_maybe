@@ -2,7 +2,7 @@ from typing import List, Dict, TypedDict
 from src.models.arguments import Arguments
 from src.models.function import Function, Parameter, ParameterType
 from pydantic import BaseModel, Field
-from src.parsing.parser_exceptions import ParsingError
+from src.parsing.parser_exceptions import ParsingError, ParsingValidationError
 import json
 
 
@@ -57,14 +57,17 @@ class Context(BaseModel):
                         "\n".join(" - " + error for error in errors)
                     )
                 )
-            function = Function(
-                name=name,
-                description=description,
-                parameters=[
-                    Parameter(name=key, type=ParameterType(value["type"]))
-                    for key, value in parameters.items()
-                ],
-            )
+            try:
+                function = Function(
+                    name=name,
+                    description=description,
+                    parameters=[
+                        Parameter(name=key, type=ParameterType(value["type"]))
+                        for key, value in parameters.items()
+                    ],
+                )
+            except ValueError as err:
+                raise ParsingError(f"Invalid parameter type: {err}")
             self.functions.append(function)
         with open(arguments.input) as prompts:
             prompts_dicts = json.loads(prompts.read())
