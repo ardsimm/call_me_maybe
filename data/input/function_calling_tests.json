@@ -3,7 +3,25 @@
     "prompt": "What is the sum of 2 and 3?"
   },
   {
-    "prompt": "What is the sum of 265 and 345?"
+    "prompt": "What is the sum of 265 and -345?"
+  },
+  {
+    "prompt": "What is the length of -42"
+  },
+  {
+    "prompt": "What is the length of \"-42-4\""
+  },
+  {
+    "prompt": "What is the length of \"-42-\""
+  },
+  {
+    "prompt": "What is the length of -42.0"
+  },
+  {
+    "prompt": "What is the length of \"-42.0-4\""
+  },
+  {
+    "prompt": "What is the length of \"-42.0-\""
   },
   {
     "prompt": "What is the sum of 25094385347592875928529084565 and 345298347529457298346572837456238765?"

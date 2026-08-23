@@ -15,6 +15,29 @@
     }
   },
   {
+    "name": "fn_int_len",
+    "description": "Computes the length of a given integer and returns it.",
+    "parameters": {
+      "n": {
+        "type": "int"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  },
+  {
+    "name": "fn_float_len",
+    "description": "Computes the length of a given float and returns it.",
+    "parameters": {
+      "n": {
+        "type": "number"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  },  {
     "name": "fn_greet",
     "description": "Generate a greeting message for a person by name.",
     "parameters": {
