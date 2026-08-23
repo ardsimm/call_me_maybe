@@ -7,20 +7,71 @@ import json
 
 
 class ParameterDict(TypedDict):
+    """Raw shape of one parameter entry in `functions_definition.json`."""
+
     type: str
 
 
 class FunctionDict(TypedDict):
+    """Raw shape of one function entry in `functions_definition.json`."""
+
     name: str
     description: str
     parameters: Dict[str, ParameterDict]
 
 
 class Context(BaseModel):
+    """The loaded, validated set of functions and prompts for a run.
+
+    Attributes
+    ----------
+    functions : list of Function
+        The functions parsed from `arguments.functions_definition`.
+    prompts : list of str
+        The prompts parsed from `arguments.input`.
+    """
+
     functions: List[Function] = Field()
     prompts: List[str] = Field()
 
     def __init__(self, arguments: Arguments):
+        """Load and validate both input files referenced by `arguments`.
+
+        Parameters
+        ----------
+        arguments : Arguments
+            Supplies the paths to the functions-definition and prompts
+            JSON files.
+
+        Raises
+        ------
+        OSError
+            If `arguments.functions_definition` or `arguments.input`
+            cannot be opened.
+        json.JSONDecodeError
+            If either file's content is not valid JSON (parsed directly
+            via `json.loads` here, not through `JSONAdapter`).
+        ParsingError
+            If a function entry is missing `name`/`description`/
+            `parameters`/`returns`, has the wrong type for one of them, or
+            has extra/missing top-level keys; or if a prompt entry is
+            missing `prompt`, has a non-string value, or has extra keys.
+        ValueError
+            Uncaught, from `ParameterType(value["type"])`: if a
+            parameter's `type` is not one of `ParameterType`'s values
+            (e.g. `"array"`), this raises directly rather than being
+            folded into the `ParsingError` convention used everywhere
+            else in this method.
+        TypeError
+            Uncaught, from `value["type"]`: if a parameter's definition is
+            not itself a dict (only the outer `parameters` dict is
+            type-checked, not each entry), subscripting it raises this.
+        pydantic.ValidationError
+            Uncaught, from constructing `Function`/`Parameter`: this
+            method only checks that `name`/`description` are strings, not
+            that they are non-empty, so an empty one passes here and then
+            fails `Function`/`Parameter`'s own `min_length=1` validation.
+        """
         super().__init__(prompts=[], functions=[])
         self.functions = []
         try:

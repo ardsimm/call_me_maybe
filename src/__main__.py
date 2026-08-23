@@ -4,6 +4,16 @@ from traceback import print_exception
 
 
 def main() -> None:
+    """Run the program.
+
+    Raises
+    ------
+    Exception
+        Anything `CallMeMaybe.run` does not catch itself (see its
+        docstring) propagates uncaught. The `except Exception` guard
+        below only prints a traceback to stderr -- it never calls
+        `sys.exit(1)`, so the process still exits 0 even after a crash.
+    """
     CallMeMaybe.run()
 
 
