@@ -71,7 +71,12 @@ class CallMeMaybe:
             elif parameter.type == ParameterType.FLOAT:
                 parsed_parameter = float(parameter.value)
             elif parameter.type == ParameterType.BOOL:
-                parsed_parameter = bool(parameter.value)
+                if parameter.value.lower() == "true":
+                    parsed_parameter = True
+                elif parameter.valie.lower == "false":
+                    parsed_parameter = False
+                else:
+                    raise ValueError(f"Invalid bool value {parameter.value}")
             else:
                 parsed_parameter = parameter.value
             item["parameters"][parameter.name] = parsed_parameter
