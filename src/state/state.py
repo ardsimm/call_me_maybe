@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import Dict, List, Optional
-from src.model.model import Model
 from src.tokenize.tokenizer import Tokenizer
 from src.tokenize.tokenizer_factory import TokenizerFactory
 from src.tokenize.tokenizer_type import TokenizerType
@@ -20,7 +19,7 @@ class State:
 
     def __init__(self) -> None:
         self._tokenizer = TokenizerFactory.get_instance(
-            TokenizerType.DEFAULT, Model.get_instance()
+            TokenizerType.DEFAULT
         )
         self.__current_stage_idx = 0
 
