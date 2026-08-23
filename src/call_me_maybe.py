@@ -73,7 +73,7 @@ class CallMeMaybe:
             elif parameter.type == ParameterType.BOOL:
                 if parameter.value.lower() == "true":
                     parsed_parameter = True
-                elif parameter.valie.lower == "false":
+                elif parameter.value.lower() == "false":
                     parsed_parameter = False
                 else:
                     raise ValueError(f"Invalid bool value {parameter.value}")
