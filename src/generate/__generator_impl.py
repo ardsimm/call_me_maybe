@@ -10,6 +10,8 @@ from .generator import Generator
 
 class GeneratorImpl(Generator):
 
+    TOKEN_GEN_LIMIT = 500
+
     def __find_unescapted_quote_idx(self, s: str) -> int:
         idx = 0
         escape_count = 0
@@ -37,9 +39,11 @@ class GeneratorImpl(Generator):
         result: List[int] = self.tokenizer.encode(prompt).tolist()[0]
         initial_len = len(result)
         token = self.__get_next_token(result, constrainer)
-        while token is not None:
+        token_count = 0
+        while token is not None and token_count < self.TOKEN_GEN_LIMIT:
             result.append(token)
             token = self.__get_next_token(result, constrainer)
+            token_count += 1
         return self.tokenizer.decode(result[initial_len:])
 
     def generate_name(self, prompt: str, functions: List[Function]) -> str:
