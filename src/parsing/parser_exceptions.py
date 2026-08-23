@@ -12,6 +12,6 @@ class ParsingValidationError(ValueError):
             f"{len(validation_errors)} "
             + "Validation error(s) occured during parsing:\n"
             + "\n"
-            + f"{'\n'.join([error.get('msg') for error in validation_errors])}"
+            + '\n'.join([error.get('msg') for error in validation_errors])
         )
         super().__init__(message)
