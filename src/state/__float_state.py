@@ -24,6 +24,8 @@ class FloatState(State):
             FloatStateStage.TERMINAL,
         ]
 
+        minus_token = self._tokenizer.encode("-").tolist()[0]
+
         digits_tokens: List[int] = reduce(
             lambda ac, el: ac + el,
             [
@@ -44,7 +46,7 @@ class FloatState(State):
         )
 
         self._stage_allowed_tokens = {
-            FloatStateStage.INITIAL: digits_tokens,
+            FloatStateStage.INITIAL: minus_token + digits_tokens,
             FloatStateStage.PRE_FLOAT_POINT: pre_float_point_tokens,
             FloatStateStage.FLOAT_POINT: digits_tokens,
             FloatStateStage.POST_FLOAT_POINT: post_float_point_tokens,
@@ -52,7 +54,7 @@ class FloatState(State):
         }
 
         self._stage_transition_tokens = {
-            FloatStateStage.INITIAL: digits_tokens,
+            FloatStateStage.INITIAL: minus_token + digits_tokens,
             FloatStateStage.PRE_FLOAT_POINT: self._tokenizer.encode(
                 "."
             ).tolist()[0],

@@ -21,6 +21,9 @@ class IntState(State):
             IntStateStage.DATA,
             IntStateStage.TERMINAL,
         ]
+
+        minus_token = self._tokenizer.encode("-").tolist()[0]
+
         digits_tokens: List[int] = reduce(
             lambda ac, el: ac + el,
             [
@@ -34,12 +37,12 @@ class IntState(State):
         data_tokens.extend(Model.get_instance().string_end_sequences)
 
         self._stage_allowed_tokens = {
-            IntStateStage.INITIAL: digits_tokens,
+            IntStateStage.INITIAL: minus_token + digits_tokens,
             IntStateStage.DATA: data_tokens,
             IntStateStage.TERMINAL: None,
         }
 
         self._stage_transition_tokens = {
-            IntStateStage.INITIAL: digits_tokens,
+            IntStateStage.INITIAL: minus_token + digits_tokens,
             IntStateStage.DATA: Model.get_instance().string_end_sequences,
         }
