@@ -1,5 +1,6 @@
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     model_validator,
 )
@@ -9,6 +10,8 @@ from src.adapter.adapter_type import AdapterType
 
 
 class Arguments(BaseModel):
+
+    model_config = ConfigDict(validate_assignment=True)
     functions_definition: str = Field(
         min_length=6, default="data/input/functions_definition.json"
     )
