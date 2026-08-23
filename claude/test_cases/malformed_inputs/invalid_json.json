@@ -1,0 +1,8 @@
+[
+  {
+    "name": "fn_broken",
+    "description": "This file is deliberately broken JSON.",
+    "parameters": {},
+    "returns": { "type": "boolean" },
+  }
+]
