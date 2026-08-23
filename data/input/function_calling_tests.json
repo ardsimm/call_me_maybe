@@ -1,5 +1,8 @@
 [
   {
+    "prompt": "Greet my friend Jo\"seph"
+  },
+  {
     "prompt": "What is the sum of 2 and 3?"
   },
   {
@@ -7,6 +10,15 @@
   },
   {
     "prompt": "What is the length of -42"
+  },
+  {
+    "prompt": "What is the length of --42"
+  },
+  {
+    "prompt": "What is the length of -------------------------42"
+  },
+  {
+    "prompt": "What is the length of ------------------------42"
   },
   {
     "prompt": "What is the length of \"-42-4\""
