@@ -43,6 +43,6 @@ class IntState(State):
         }
 
         self._stage_transition_tokens = {
-            IntStateStage.INITIAL: minus_token + digits_tokens,
+            IntStateStage.INITIAL: digits_tokens,
             IntStateStage.DATA: Model.get_instance().string_end_sequences,
         }
