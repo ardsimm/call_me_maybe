@@ -12,7 +12,7 @@
     "prompt": "Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'"
   },
   {
-      "prompt": "Reverse \"\""
+    "prompt": "Reverse \"\""
   },
   {
     "prompt": "What is the sum of -17 and -25?"
@@ -49,5 +49,14 @@
   },
   {
     "prompt": "Book a flight to Tokyo for Alice Dupont, seat 42, price 350.5, with luggage"
+  },
+  {
+    "prompt": "What is the sum of 6.022e23 and 1"
+  },
+  {
+    "prompt": "What is the sum of 6.022e-23 and 1"
+  },
+  {
+    "prompt": "What is the length of \"-42-4\""
   }
 ]
