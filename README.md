@@ -258,8 +258,91 @@ Known remaining limitations:
 
 ## Testing strategy
 
-<!-- How the implementation was validated. -->
+Per the subject's "Additional Guidelines", tests are for the author's own verification and are not
+submitted or graded, so there is no unit test suite and no test framework (`pytest`, `unittest`,
+etc.) anywhere in this repo. Verification instead runs the real CLI end to end against hand-written
+JSON fixtures — the same way a user would actually invoke the program.
+
+- **`claude/test_cases/`** — one subdirectory per scenario, each a self-contained
+  `functions_definition.json` + `function_calling_tests.json` pair meant to be passed straight to
+  `src` (`claude/test_cases/manifest.md` lists every scenario with its exact run command):
+  - Happy-path scenarios stress multi-parameter functions spanning every `ParameterType`, edge-case
+    values (negatives, zero, many-digit decimals, empty/whitespace strings, quotes, emoji, non-ASCII
+    text), deliberately ambiguous or adversarial prompts (including prompt-injection attempts), and
+    brand-new function domains never seen elsewhere in the test data.
+  - **`malformed_inputs/`** pairs each bad input file (invalid JSON, missing/extra keys, wrong
+    types, a parameter type outside the schema, empty functions/prompts, a missing file entirely)
+    with an otherwise-valid counterpart, to isolate one failure mode at a time and confirm the
+    program never crashes on it — no crash, a clear message, a graceful exit, per the subject's
+    error-handling requirements.
+- **`claude/run_tests.py`** (`make test`) automates running every scenario above and grading the
+  result:
+  - Each happy-path scenario is paired with an `expected_results.json` — the ground-truth
+    `name`/`parameters` for every prompt, worked out by hand from what the prompt actually asks for,
+    independently of what the model happens to output. Genuinely ambiguous or adversarial prompts
+    with no single correct answer are marked `"skip": true`: still run, but excluded from the
+    accuracy tally rather than graded against an arbitrary "correct" answer.
+  - Every `malformed_inputs/` fixture is re-run and checked for a clean exit code, separately from
+    the accuracy tally.
+  - A markdown report — overall and per-scenario function-name accuracy, parameter accuracy (numeric
+    values compared with a small tolerance rather than exact string equality), and malformed-input
+    robustness, plus a full per-prompt pass/fail table — is written to `claude/test-reports/`, one
+    timestamped file per run, so accuracy can be tracked over time as the implementation changes.
+- Bugs surfaced by this testing were written up as GitHub-issue-style documents under
+  `claude/issues/` (see "Challenges faced" above) with exact repro commands, rather than just fixed
+  silently, so each one stays checkable against the running program later.
 
 ## Example usage
 
-<!-- Clear examples of running the program. -->
+```sh
+make install
+make run
+```
+
+Reads the default `data/input/functions_definition.json` and `data/input/function_calling_tests.json`,
+and writes an array of `{prompt, name, parameters}` objects to `data/output/function_calls.json`,
+one entry per prompt, e.g.:
+
+```json
+[
+  {
+    "prompt": "What is the sum of 40 and 2?",
+    "name": "fn_add_numbers",
+    "parameters": { "a": 40.0, "b": 2.0 }
+  }
+]
+```
+
+To run against custom functions/prompts, or a different model:
+
+```sh
+uv run python -m src \
+  --functions_definition claude/test_cases/multi_param_types/functions_definition.json \
+  --input claude/test_cases/multi_param_types/function_calling_tests.json \
+  --output data/output/multi_param_types.json \
+  --model Qwen/Qwen3-0.6B
+```
+
+Given the prompt `"Book a flight to Tokyo for Alice Dupont, seat 42, price 350.5, with luggage"`,
+this produces:
+
+```json
+{
+  "prompt": "Book a flight to Tokyo for Alice Dupont, seat 42, price 350.5, with luggage",
+  "name": "fn_book_flight",
+  "parameters": {
+    "passenger_name": "Alice Dupont",
+    "seat_number": 42,
+    "price": 350.5,
+    "has_luggage": true,
+    "destination": "Tokyo"
+  }
+}
+```
+
+To grade the implementation's accuracy against every scenario under `claude/test_cases/` and write
+a fresh report to `claude/test-reports/`:
+
+```sh
+make test
+```
