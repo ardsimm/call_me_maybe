@@ -3,6 +3,12 @@
         "prompt": "What is the sum of 6.022e23 and 1"
     },
     {
+        "prompt": "What is the sum of -.2 and 1"
+    },
+    {
+        "prompt": "What is the sum of -2 and 1"
+    },
+    {
         "prompt": "What is the sum of 6.022e+23 and 1"
     },
     {
