@@ -5,6 +5,8 @@
 /tests/stderr
 .out
 /private
+/call_me_maybe
+/run_tests
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
