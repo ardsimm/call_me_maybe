@@ -2,7 +2,7 @@ from typing import List, Dict, TypedDict
 from src.models.arguments import Arguments
 from src.models.function import Function, Parameter, ParameterType
 from pydantic import BaseModel, Field
-from src.parsing.parser_exceptions import ParsingError
+from src.parsing.parser_exceptions import ParsingError, ParsingValidationError
 import json
 
 
@@ -49,22 +49,25 @@ class Context(BaseModel):
                 errors.append("Invalid type for parameters in function")
             if returns is not None and not isinstance(returns, dict):
                 errors.append("Invalid type for returns in function")
-            if (len(function_dict.items()) != 4):
-                errors.append("To many entries in function")
+            if (len(function_dict.items()) > 4):
+                errors.append("Too many entries in function")
             if (len(errors)):
                 raise ParsingError(
                     "Missing or invalid fields in function:\n" + (
                         "\n".join(" - " + error for error in errors)
                     )
                 )
-            function = Function(
-                name=name,
-                description=description,
-                parameters=[
-                    Parameter(name=key, type=ParameterType(value["type"]))
-                    for key, value in parameters.items()
-                ],
-            )
+            try:
+                function = Function(
+                    name=name,
+                    description=description,
+                    parameters=[
+                        Parameter(name=key, type=ParameterType(value["type"]))
+                        for key, value in parameters.items()
+                    ],
+                )
+            except ValueError as err:
+                raise ParsingError(f"Invalid parameter type: {err}")
             self.functions.append(function)
         with open(arguments.input) as prompts:
             prompts_dicts = json.loads(prompts.read())
