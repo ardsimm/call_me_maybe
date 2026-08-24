@@ -1,0 +1,45 @@
+[
+  {
+    "name": "fn_greet",
+    "parameters": { "name": "Old \"Blue Eyes\" Sinatra" }
+  },
+  {
+    "name": "fn_store_note",
+    "parameters": {
+      "note": "This is a very long note that keeps going and going and going in order to approach the token generation limit of the underlying constrained decoder, repeating filler text over and over and over again until it becomes quite long indeed, testing whether long values still get captured in full without being cut off prematurely by any safety cap or token budget the system might impose on a single generated value, which would be a real limitation worth documenting if it happens here today during this test run right now."
+    }
+  },
+  {
+    "name": "fn_reverse_string",
+    "parameters": { "s": "@#$%^&*()_+-=[]{}|;:,.<>?" }
+  },
+  {
+    "name": "fn_add_numbers",
+    "parameters": { "a": 6.022e23, "b": 1.0 }
+  },
+  {
+    "name": "fn_greet",
+    "parameters": { "name": "SHREK" }
+  },
+  {
+    "name": "fn_control_lights",
+    "parameters": { "room": "kitchen", "powered": false }
+  },
+  {
+    "name": "fn_add_numbers",
+    "parameters": { "a": 42.0, "b": 1.0 },
+    "note": "a is a 52-digit negative integer, unrepresentable as float64 (overflows to -inf); current fallback substitutes 42.0"
+  },
+  {
+    "skip": true,
+    "note": "single-word prompt ('Hi'), no clearly matching function"
+  },
+  {
+    "name": "fn_reverse_string",
+    "parameters": { "s": "     " }
+  },
+  {
+    "name": "fn_store_note",
+    "parameters": { "note": "Meeting at café — bring the résumé!" }
+  }
+]

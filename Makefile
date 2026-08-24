@@ -13,6 +13,9 @@ run: install
 debug: install
 	uv run python -m pdb src/__main__.py
 
+test: install
+	uv run python claude/run_tests.py
+
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type d -name .mypy_cache -exec rm -rf {} +
@@ -39,4 +42,4 @@ lint-strict: flake8 mypy-strict
 black: install
 	uv run python -m black --line-length 79 .
 
-.phony: install re run debug clean fclean flake8 mypy lint mypy-strict lint-strict black
+.phony: install re run debug test clean fclean flake8 mypy lint mypy-strict lint-strict black

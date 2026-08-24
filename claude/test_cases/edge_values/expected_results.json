@@ -1,0 +1,56 @@
+[
+  {
+    "name": "fn_add_numbers",
+    "parameters": { "a": -17.0, "b": -25.0 }
+  },
+  {
+    "name": "fn_add_numbers",
+    "parameters": { "a": 0.0, "b": 0.0 }
+  },
+  {
+    "name": "fn_add_numbers",
+    "parameters": { "a": 3.14159265358979, "b": 2.71828182845904 }
+  },
+  {
+    "name": "fn_add_numbers",
+    "parameters": { "a": 42.0, "b": 1.0 },
+    "note": "a is a 42-digit integer, unrepresentable as float64 (overflows to inf); current fallback substitutes 42.0"
+  },
+  {
+    "name": "fn_multiply_numbers",
+    "parameters": { "a": -8.0, "b": 0.001 }
+  },
+  {
+    "name": "fn_get_square_root",
+    "parameters": { "a": 0.0 }
+  },
+  {
+    "name": "fn_greet",
+    "parameters": { "name": "" }
+  },
+  {
+    "name": "fn_reverse_string",
+    "parameters": { "s": "" }
+  },
+  {
+    "name": "fn_reverse_string",
+    "parameters": { "s": " " }
+  },
+  {
+    "name": "fn_store_note",
+    "parameters": { "note": "Call me \"Bob\" @ 5 o'clock, 100% sure!" }
+  },
+  {
+    "name": "fn_store_note",
+    "parameters": { "note": "日本語のテスト with emojis 🚀🔥" }
+  },
+  {
+    "name": "fn_store_note",
+    "parameters": { "note": "line one\\nline two\\ttabbed" },
+    "note": "the source prompt contains a literal backslash-n/backslash-t, not real control characters"
+  },
+  {
+    "name": "fn_greet",
+    "parameters": { "name": "Jean-François O'Malley-Smédry" }
+  }
+]
