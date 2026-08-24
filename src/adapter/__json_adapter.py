@@ -26,10 +26,6 @@ class JSONAdapter(Adapter):
         ------
         SerializationException
             If `value` is not JSON-serializable.
-        TypeError
-            `json.dumps` raises `TypeError` (not `JSONDecodeError`) for a
-            non-serializable value, so it is not caught here and propagates
-            uncaught.
         """
         dump: str
         try:

@@ -1,6 +1,6 @@
 from typing import List
 
-from src.state.trie_state import TrieState
+from src.state.__trie_state import TrieState
 
 from .__float_state import FloatState
 from .__int_state import IntState
@@ -29,16 +29,9 @@ class StateFactory:
         Raises
         ------
         ValueError
-            If `type` is `StateType.STRING_STATE`, `INT_STATE`, or
-            `FLOAT_STATE`, this is the only error raised, for values
-            outside those three.
-        AttributeError
-            `StateType` has no `TRIE_STATE` member, so the `type ==
-            StateType.TRIE_STATE` check below only ever executes for a
-            value already ruled out by the three checks above it -- at
-            which point evaluating `StateType.TRIE_STATE` itself raises
-            `AttributeError` before the intended `ValueError` is ever
-            reached. Use `get_trie_state_instance` to build a `TrieState`.
+            If `type` is none of `StateType.STRING_STATE`, `INT_STATE`, or
+            `FLOAT_STATE`. There is no `StateType` member for `TrieState`;
+            use `get_trie_state_instance` to build one instead.
         """
         if type == StateType.STRING_STATE:
             return StringState()

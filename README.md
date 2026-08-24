@@ -231,6 +231,31 @@ Known remaining limitations:
 
 <!-- Difficulties encountered and how they were solved. -->
 
+- `Model.string_end_sequences` decides whether a token ends a JSON string purely by looking at
+  that token's own text, with no awareness of the string generated so far -- this one design
+  choice is the root cause behind most of the issues below, several of which are different
+  symptoms of the same underlying gap. Full write-ups, repro steps, and fixes are tracked under
+  `claude/issues/`:
+  - A merged vocab token can smuggle a stray character (e.g. a trailing `-`) past `IntState`'s
+    digit check, producing an otherwise-invalid numeral (`claude/issues/issue_2_20260824-123805.md`).
+  - `IntState` (and originally `FloatState`) had no mechanism forcing a digit after a leading `-`,
+    so the model could in principle repeat `-` forever with no digit ever required
+    (`claude/issues/issue_4_20260824-165933.md`).
+  - Numeric parameters could overflow to `Infinity`/`-Infinity` (not valid JSON) via scientific
+    notation runaway digit generation, and the `<|im_end|>`/`<|im_start|>` prompt-injection guard
+    was initially bypassable (`claude/issues/issue_3_20260824-130008.md`).
+  - Several exception-handling gaps let a single malformed prompt or parameter silently drop or
+    crash an entire batch instead of failing just that one item -- found while writing docstrings'
+    `Raises` sections, which forced tracing every call path's exceptions end to end
+    (`claude/issues/issue_0_20260823-213125.md`).
+  - Dead code left over from an abandoned pattern (unused enum members, an unreachable setter)
+    was found by grepping for actual call sites rather than trusting the source alone
+    (`claude/issues/fixed_issue_1_20260823-213741.md`).
+  - Separately, a circular import surfaced when `Arguments.validate_model` imported
+    `ParsingError` at module level: importing any submodule of a package always runs that
+    package's `__init__.py` first, which pulled in `Parser`, which needed `Arguments` back before
+    it had finished being defined. Fixed by making the import local to `validate_model`.
+
 ## Testing strategy
 
 <!-- How the implementation was validated. -->

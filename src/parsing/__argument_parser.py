@@ -62,9 +62,6 @@ class ArgumentParser(Parser):
             help="The path to the JSON file to write the output of the LLM",
             default=None,
         )
-        parser.add_argument(
-            "--model", help="The model to use for the generation", default=None
-        )
 
         try:
             arguments = Arguments()
@@ -75,8 +72,6 @@ class ArgumentParser(Parser):
                 arguments.input = parsed.input
             if parsed.output is not None:
                 arguments.output = parsed.output
-            if parsed.model is not None:
-                arguments.model = parsed.model
         except ValidationError as e:
             validation_errors = e.errors()
             raise ParsingValidationError(validation_errors)

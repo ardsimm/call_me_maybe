@@ -5,6 +5,20 @@ from .state import StateStage, State
 
 
 class FloatStateStage(StateStage):
+    """Stages of float generation, including scientific notation.
+
+    `INITIAL` branches on the first token: `-` routes to
+    `POST_MINUS_TOKEN` (forcing a digit next, so a bare `-` can never
+    terminate the number), a digit routes straight to `PRE_FLOAT_POINT`.
+    `PRE_FLOAT_POINT` accepts more digits or the decimal point
+    (`FLOAT_POINT`), which forces a digit (`POST_FLOAT_POINT`).
+    `POST_FLOAT_POINT` branches again: more digits, a
+    `string_end_sequences` token (ending generation at `TERMINAL`), or
+    `e`/`E` starting scientific notation (`POST_SCIENTIFIC_E_TOKEN`),
+    which forces a `+`/`-` sign (`POST_SCIENTIFIC_SIGN`), then digits
+    (`POST_SCIENTIFIC_EXP`), then a `string_end_sequences` token.
+    """
+
     INITIAL = 0
     POST_MINUS_TOKEN = 1
     PRE_FLOAT_POINT = 2
@@ -17,6 +31,13 @@ class FloatStateStage(StateStage):
 
 
 class FloatState(State):
+    """`State` accepting a JSON float, e.g. `-6.022e+23`.
+
+    `_advance_stage` is overridden because both `INITIAL` and
+    `POST_FLOAT_POINT` branch to more than one possible next stage
+    depending on the emitted token -- the base class's linear `_stages`
+    list can only express a single next stage per transition.
+    """
 
     minus_token: List[int]
     plus_token: List[int]
@@ -26,6 +47,7 @@ class FloatState(State):
     string_end_sequences: List[int]
 
     def __init__(self) -> None:
+        """Build the digit/sign/point/exponent token sets and stage maps."""
         super().__init__()
         self._stages = [
             FloatStateStage.INITIAL,
@@ -95,6 +117,16 @@ class FloatState(State):
         }
 
     def _advance_stage(self, token: int) -> None:
+        """Advance past `INITIAL`/`POST_FLOAT_POINT` by branching on `token`.
+
+        Every other stage falls back to the base class's linear
+        transition logic.
+
+        Parameters
+        ----------
+        token : int
+            The token id that was just emitted.
+        """
         if self.current_stage not in [
             FloatStateStage.INITIAL,
             FloatStateStage.POST_FLOAT_POINT
