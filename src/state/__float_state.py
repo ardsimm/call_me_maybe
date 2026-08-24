@@ -6,13 +6,14 @@ from .state import StateStage, State
 
 class FloatStateStage(StateStage):
     INITIAL = 0
-    PRE_FLOAT_POINT = 1
-    FLOAT_POINT = 2
-    POST_FLOAT_POINT = 3
-    POST_SCIENTIFIC_E_TOKEN = 4
-    POST_SCIENTIFIC_SIGN = 5
-    POST_SCIENTIFIC_EXP = 6
-    TERMINAL = 7
+    POST_MINUS_TOKEN = 1
+    PRE_FLOAT_POINT = 2
+    FLOAT_POINT = 3
+    POST_FLOAT_POINT = 4
+    POST_SCIENTIFIC_E_TOKEN = 5
+    POST_SCIENTIFIC_SIGN = 6
+    POST_SCIENTIFIC_EXP = 7
+    TERMINAL = 8
 
 
 class FloatState(State):
@@ -28,6 +29,7 @@ class FloatState(State):
         super().__init__()
         self._stages = [
             FloatStateStage.INITIAL,
+            FloatStateStage.POST_MINUS_TOKEN,
             FloatStateStage.PRE_FLOAT_POINT,
             FloatStateStage.FLOAT_POINT,
             FloatStateStage.POST_FLOAT_POINT,
@@ -54,6 +56,7 @@ class FloatState(State):
 
         self._stage_allowed_tokens = {
             FloatStateStage.INITIAL: self.minus_token + self.digits_tokens,
+            FloatStateStage.POST_MINUS_TOKEN: self.digits_tokens,
             FloatStateStage.PRE_FLOAT_POINT: (
                 self.digits_tokens + self.dot_token
             ),
@@ -76,6 +79,7 @@ class FloatState(State):
 
         self._stage_transition_tokens = {
             FloatStateStage.INITIAL: self.minus_token + self.digits_tokens,
+            FloatStateStage.POST_MINUS_TOKEN: self.digits_tokens,
             FloatStateStage.PRE_FLOAT_POINT: self.dot_token,
             FloatStateStage.FLOAT_POINT: self.digits_tokens,
             FloatStateStage.POST_FLOAT_POINT: (
@@ -91,8 +95,16 @@ class FloatState(State):
         }
 
     def _advance_stage(self, token: int) -> None:
-        if self.current_stage not in [FloatStateStage.POST_FLOAT_POINT]:
+        if self.current_stage not in [
+            FloatStateStage.INITIAL,
+            FloatStateStage.POST_FLOAT_POINT
+        ]:
             super()._advance_stage(token)
+        elif self.current_stage == FloatStateStage.INITIAL:
+            if token in self.minus_token:
+                self.current_stage = FloatStateStage.POST_MINUS_TOKEN
+            else:
+                self.current_stage = FloatStateStage.PRE_FLOAT_POINT
         else:
             if (
                 token

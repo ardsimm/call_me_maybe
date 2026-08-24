@@ -31,16 +31,17 @@ class IntState(State):
             [],
         )
 
-        data_tokens = list(digits_tokens)
-        data_tokens.extend(Model.get_instance().string_end_sequences)
+        string_end_sequences = Model.get_instance().string_end_sequences
 
         self._stage_allowed_tokens = {
             IntStateStage.INITIAL: minus_token + digits_tokens,
-            IntStateStage.DATA: data_tokens,
+            IntStateStage.DATA: (
+                digits_tokens + string_end_sequences
+            ),
             IntStateStage.TERMINAL: None,
         }
 
         self._stage_transition_tokens = {
             IntStateStage.INITIAL: digits_tokens,
-            IntStateStage.DATA: Model.get_instance().string_end_sequences,
+            IntStateStage.DATA: string_end_sequences,
         }
