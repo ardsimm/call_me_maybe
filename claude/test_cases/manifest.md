@@ -70,9 +70,11 @@ uv run python -m src \
   whitespace, and swapped for a different real special token (`<|endoftext|>`) entirely, to map
   the guard's actual boundaries rather than just its one known-caught case.
 
-**Known issue surfaced by `extreme_edge_cases`**: `"What is the sum of 6.022e23 and 1"` produces
-`{"a": 6.022, "b": Infinity}` -- `Infinity` is not valid JSON (RFC 8259). Full trace and root cause
-in `claude/reports/report_4_20260824-125422.md`.
+**Fixed** (was: `extreme_edge_cases`'s `"What is the sum of 6.022e23 and 1"` produced
+`{"a": 6.022, "b": Infinity}` -- invalid JSON per RFC 8259). A `math.isinf` check now makes this
+case refuse cleanly instead. The underlying `FloatState` scientific-notation limitation that
+triggers it is still open -- see `claude/issues/issue_3_20260824-130008.md` and
+`claude/reports/report_4_20260824-125422.md`.
 
 ## Error-handling scenarios (malformed_inputs/)
 

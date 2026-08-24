@@ -1,3 +1,5 @@
+import math
+
 from src.generate import GeneratorFactory
 from src.generate import GenerationError
 from src.model.model import Model
@@ -10,7 +12,7 @@ import sys
 from pathlib import Path
 
 
-header = r"""           _ _                                              _
+HEADER = r"""           _ _                                              _
   ___ __ _| | |    _ __ ___   ___     _ __ ___   __ _ _   _| |__   ___
  / __/ _` | | |   | '_ ` _ \ / _ \   | '_ ` _ \ / _` | | | | '_ \ / _ \
 | (_| (_| | | |   | | | | | |  __/   | | | | | | (_| | |_| | |_) |  __/
@@ -19,6 +21,11 @@ header = r"""           _ _                                              _
 
 Made with love and pain by ardsimm
 """
+
+
+MAX_LOG_SEPARATOR_LEN = len(
+    HEADER.split("\n")[1]
+) + 1
 
 
 class CallMeMaybe:
@@ -38,11 +45,11 @@ class CallMeMaybe:
         item: OutputItem = {"prompt": "", "name": "", "parameters": {}}
         item["prompt"] = prompt
         print(
-            "\n=====================================================",
-            "=====================================================",
+            "\n" + "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
+            "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
             prompt,
-            "=====================================================",
-            "=====================================================",
+            "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
+            "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
             sep="\n",
         )
         if "<|im_end|>" in prompt or "<|im_start|>" in prompt:
@@ -61,28 +68,62 @@ class CallMeMaybe:
         picked_function = filtered_functions[0]
         item["name"] = picked_function.name
         parameters = generator.generate_parameters(prompt, picked_function)
+        for parameter in parameters:
+            parsed_parameter: Union[int, float, str, bool]
+            assert parameter.value is not None
+            if parameter.type == ParameterType.INT:
+                try:
+                    parsed_parameter = int(parameter.value)
+                    if math.isinf(parsed_parameter):
+                        raise ValueError("Int parameter overflowed")
+                except ValueError as err:
+                    print(
+                        f"Failed to generate int parameter {parameter.name}:",
+                        err.__str__()
+                    )
+                    parsed_parameter = 42
+
+            elif parameter.type == ParameterType.FLOAT:
+                try:
+                    parsed_parameter = float(parameter.value)
+                    if math.isinf(parsed_parameter):
+                        raise ValueError("Float parameter overflowed")
+                except ValueError as err:
+                    print(
+                        f"Failed to generate float parameter {
+                            parameter.name
+                        }:",
+                        err.__str__()
+                    )
+                    parsed_parameter = 42.0
+
+            elif parameter.type == ParameterType.BOOL:
+                if parameter.value.lower() == "true" or parameter.value == "1":
+                    parsed_parameter = True
+                elif (
+                    parameter.value.lower() == "false"
+                    or parameter.value == "0"
+                ):
+                    parsed_parameter = False
+                else:
+                    print(
+                        f"Failed to generate parameter {parameter.name}:",
+                        f"Invalid boolean value :{parameter.value}"
+                    )
+                    parsed_parameter = ""
+
+            else:
+                parsed_parameter = parameter.value
+
+            item["parameters"][parameter.name] = parsed_parameter
+
         print("Generated parameters:")
         for parameter in parameters:
             print(
                 f"- {parameter.name} <{parameter.type.value}>:",
-                f"[{parameter.value}]",
+                f"[{item["parameters"][parameter.name]}]",
             )
-            parsed_parameter: Union[int, float, str, bool]
-            assert parameter.value is not None
-            if parameter.type == ParameterType.INT:
-                parsed_parameter = int(parameter.value)
-            elif parameter.type == ParameterType.FLOAT:
-                parsed_parameter = float(parameter.value)
-            elif parameter.type == ParameterType.BOOL:
-                if parameter.value.lower() == "true":
-                    parsed_parameter = True
-                elif parameter.value.lower() == "false":
-                    parsed_parameter = False
-                else:
-                    raise ValueError(f"Invalid bool value {parameter.value}")
-            else:
-                parsed_parameter = parameter.value
-            item["parameters"][parameter.name] = parsed_parameter
+
         return item
 
     @classmethod
@@ -90,6 +131,7 @@ class CallMeMaybe:
         items: List[OutputItem] = []
 
         for prompt in context.prompts:
+            item: OutputItem = {"prompt": prompt, "name": "", "parameters": {}}
             try:
                 item = cls.__process_prompt(prompt, context)
                 items.append(item)
@@ -113,7 +155,7 @@ class CallMeMaybe:
 
     @classmethod
     def run(cls) -> None:
-        print(header)
+        print(HEADER)
         try:
             arguments: Arguments = cls.__get_arguments()
             context = cls.__get_context(arguments)
