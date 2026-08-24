@@ -52,7 +52,7 @@ class CallMeMaybe:
             "7",
             "8",
             "9",
-        )):
+        ) and s_len > 0):
             s = s[:s_len - 1]
             s_len -= 1
         return s
