@@ -59,19 +59,24 @@ class CallMeMaybe:
             `""` if `s` contains no digit at all.
         """
         s_len = len(s)
-        while not s.endswith((
-            "0",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-        )) and s_len > 0:
-            s = s[:s_len - 1]
+        while (
+            not s.endswith(
+                (
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                )
+            )
+            and s_len > 0
+        ):
+            s = s[: s_len - 1]
             s_len -= 1
         return s
 
@@ -188,9 +193,7 @@ class CallMeMaybe:
             assert parameter.value is not None
             if parameter.type == ParameterType.INT:
                 try:
-                    parameter.value = cls.__strip_number(
-                        parameter.value
-                    )
+                    parameter.value = cls.__strip_number(parameter.value)
                     parsed_parameter = int(parameter.value)
                     if math.isinf(parsed_parameter):
                         # Python is a FAKE language made by CRAZY people
@@ -204,9 +207,7 @@ class CallMeMaybe:
 
             elif parameter.type == ParameterType.FLOAT:
                 try:
-                    parameter.value = cls.__strip_number(
-                        parameter.value
-                    )
+                    parameter.value = cls.__strip_number(parameter.value)
                     parsed_parameter = float(parameter.value)
                     if math.isinf(parsed_parameter):
                         # Python is a FAKE language made by CRAZY people

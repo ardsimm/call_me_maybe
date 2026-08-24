@@ -58,9 +58,7 @@ class IntState(State):
         self._stage_allowed_tokens = {
             IntStateStage.INITIAL: self.minus_token + digits_tokens,
             IntStateStage.POST_MINUS: digits_tokens,
-            IntStateStage.POST_DIGIT: (
-                digits_tokens + string_end_sequences
-            ),
+            IntStateStage.POST_DIGIT: (digits_tokens + string_end_sequences),
             IntStateStage.TERMINAL: None,
         }
 

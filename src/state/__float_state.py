@@ -129,7 +129,7 @@ class FloatState(State):
         """
         if self.current_stage not in [
             FloatStateStage.INITIAL,
-            FloatStateStage.POST_FLOAT_POINT
+            FloatStateStage.POST_FLOAT_POINT,
         ]:
             super()._advance_stage(token)
         elif self.current_stage == FloatStateStage.INITIAL:
@@ -138,10 +138,7 @@ class FloatState(State):
             else:
                 self.current_stage = FloatStateStage.PRE_FLOAT_POINT
         else:
-            if (
-                token
-                in self.lower_e_token + self.upper_e_token
-            ):
+            if token in self.lower_e_token + self.upper_e_token:
                 self.current_stage = FloatStateStage.POST_SCIENTIFIC_E_TOKEN
             elif token in self.string_end_sequences:
                 self.current_stage = FloatStateStage.TERMINAL
