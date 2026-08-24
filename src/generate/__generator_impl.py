@@ -3,14 +3,13 @@ from src.constrainer.constrainer_factory import ConstrainerFactory
 from src.prompting.prompting import Prompting
 from src.state import StateFactory, StateType, State
 from src.models.function import Parameter, ParameterType, Function
-from .generator_exceptions import GenerationError
-from typing import List, Optional, Callable, Union
+from typing import List, Optional
 from .generator import Generator
 
 
 class GeneratorImpl(Generator):
 
-    TOKEN_GEN_LIMIT = 500
+    TOKEN_GEN_LIMIT = 250
 
     def __find_unescapted_quote_idx(self, s: str) -> int:
         idx = 0
@@ -39,7 +38,9 @@ class GeneratorImpl(Generator):
             self.model.get_logits_from_input_ids(result)
         )
         if token is not None:
-            print("Generated: ", self.tokenizer.decode([token]))
+            print(f"Generated: [{
+                self.tokenizer.decode([token]).replace("\n", "\\n")
+            }]")
         return token
 
     def __get_completion(self, prompt: str, constrainer: Constrainer) -> str:
@@ -86,16 +87,11 @@ class GeneratorImpl(Generator):
             prompt = Prompting.build_next_parameter_generation_prompt(
                 prompt, function, parameter, last_parameter
             )
-            value_parser: Optional[
-                Callable[[str], Union[int, float, bool]]
-            ] = None
             state: State = StateFactory.get_instance(StateType.STRING_STATE)
             if parameter.type == ParameterType.INT:
                 state = StateFactory.get_instance(StateType.INT_STATE)
-                value_parser = int
             elif parameter.type == ParameterType.FLOAT:
                 state = StateFactory.get_instance(StateType.FLOAT_STATE)
-                value_parser = float
             elif parameter.type == ParameterType.BOOL:
                 state = StateFactory.get_trie_state_instance(
                     [
@@ -103,21 +99,12 @@ class GeneratorImpl(Generator):
                         for value in ["true", "false"]
                     ]
                 )
-                value_parser = bool
 
             result = self.__get_completion(
                 prompt=prompt,
                 constrainer=ConstrainerFactory.get_instance(state),
             )
             stripped_result = self.__strip_completion(result)
-            if value_parser is not None:
-                try:
-                    value_parser(stripped_result)
-                except ValueError:
-                    raise GenerationError(
-                        "Invalid value for parameter of type"
-                        + f" {parameter.type.value}: {stripped_result}",
-                    )
             parameter.value = stripped_result
             last_parameter = Parameter(
                 name=parameter.name, type=parameter.type, value=parameter.value

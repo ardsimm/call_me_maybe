@@ -28,6 +28,25 @@ MAX_LOG_SEPARATOR_LEN = len(HEADER.split("\n")[1]) + 1
 class CallMeMaybe:
 
     @staticmethod
+    def __strip_trailing_minus_sign(s: str) -> str:
+        # In specific cases, the LLM might generate the token `-"` or `-",`
+        # at the end of an number. With our logic loading every token
+        # containing unescaped quotes and using them as end
+        # sequences for our completion and since we strip the quotes after
+        # decoding, keeping the first non-quote character without any constrain
+        # we can get invalid numbers such as `-42-`.
+        # For instance:
+        # User: `Print the number "-42-4"``
+        # LLM: `-42-"`,
+        # After quotes stripping: number = `-42-`
+        # The following function is a workaround for this bug,
+        s_len = len(s)
+        while s.endswith("-"):
+            s = s[:s_len - 1]
+            s_len -= 1
+        return s
+
+    @staticmethod
     def __get_arguments() -> Arguments:
         parser = ParserFactory.get_instance()
         return parser.parse(sys.argv[1:])
@@ -36,8 +55,8 @@ class CallMeMaybe:
     def __get_context(arguments: Arguments) -> Context:
         return Context(arguments)
 
-    @staticmethod
-    def __process_prompt(prompt: str, context: Context) -> OutputItem:
+    @classmethod
+    def __process_prompt(cls, prompt: str, context: Context) -> OutputItem:
         generator = GeneratorFactory.get_instance()
         item: OutputItem = {"prompt": "", "name": "", "parameters": {}}
         item["prompt"] = prompt
@@ -70,6 +89,9 @@ class CallMeMaybe:
             assert parameter.value is not None
             if parameter.type == ParameterType.INT:
                 try:
+                    parameter.value = cls.__strip_trailing_minus_sign(
+                        parameter.value
+                    )
                     parsed_parameter = int(parameter.value)
                     if math.isinf(parsed_parameter):
                         raise ValueError("Int parameter overflowed")
@@ -82,6 +104,9 @@ class CallMeMaybe:
 
             elif parameter.type == ParameterType.FLOAT:
                 try:
+                    parameter.value = cls.__strip_trailing_minus_sign(
+                        parameter.value
+                    )
                     parsed_parameter = float(parameter.value)
                     if math.isinf(parsed_parameter):
                         raise ValueError("Float parameter overflowed")

@@ -12,6 +12,18 @@
     }
   },
   {
+    "name": "fn_float_len",
+    "description": "Computes the length of a given float and returns it.",
+    "parameters": {
+      "n": {
+        "type": "number"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  },
+  {
     "name": "fn_reverse_string",
     "description": "Reverse a string and return the reversed result.",
     "parameters": {
