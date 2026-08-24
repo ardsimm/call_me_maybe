@@ -147,5 +147,29 @@
     "returns": {
       "type": "int"
     }
+  },
+  {
+    "name": "fn_book_flight",
+    "description": "Book a flight for a passenger to a destination, with seat and luggage info.",
+    "parameters": {
+      "passenger_name": {
+        "type": "string"
+      },
+      "seat_number": {
+        "type": "int"
+      },
+      "price": {
+        "type": "number"
+      },
+      "has_luggage": {
+        "type": "boolean"
+      },
+      "destination": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "string"
+    }
   }
 ]
