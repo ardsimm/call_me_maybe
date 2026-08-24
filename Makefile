@@ -14,7 +14,7 @@ debug: install
 	uv run python -m pdb src/__main__.py
 
 test: install
-	uv run python claude/run_tests.py
+	uv run python -m tests
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +

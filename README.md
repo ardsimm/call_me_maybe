@@ -204,7 +204,7 @@ You can run these tests on your machine with
 make test
 ```
 
-A report will be generated and written to `/claude/test-reports`
+A report will be generated and written to `/tests/test-reports`
 
 > The test cases include a prompt injection attempt that is skipped by the program. This prompt is ignored in the metrics given here since it cannot be properly processed with the tools available to us in this project.
 
@@ -241,9 +241,9 @@ submitted or graded, so there is no unit test suite and no test framework (`pyte
 etc.) anywhere in this repo. Verification instead runs the real CLI end to end against hand-written
 JSON fixtures — the same way a user would actually invoke the program.
 
-- **`claude/test_cases/`** — one subdirectory per scenario, each a self-contained
+- **`tests/test_cases/`** — one subdirectory per scenario, each a self-contained
   `functions_definition.json` + `function_calling_tests.json` pair meant to be passed straight to
-  `src` (`claude/test_cases/manifest.md` lists every scenario with its exact run command):
+  `src` (`tests/test_cases/manifest.md` lists every scenario with its exact run command):
   - Happy-path scenarios stress multi-parameter functions spanning every `ParameterType`, edge-case
     values (negatives, zero, many-digit decimals, empty/whitespace strings, quotes, emoji, non-ASCII
     text), deliberately ambiguous or adversarial prompts (including prompt-injection attempts), and
@@ -253,7 +253,7 @@ JSON fixtures — the same way a user would actually invoke the program.
     with an otherwise-valid counterpart, to isolate one failure mode at a time and confirm the
     program never crashes on it — no crash, a clear message, a graceful exit, per the subject's
     error-handling requirements.
-- **`claude/run_tests.py`** (`make test`) automates running every scenario above and grading the
+- **`tests/__main__.py`** (`make test`) automates running every scenario above and grading the
   result:
   - Each happy-path scenario is paired with an `expected_results.json` — the ground-truth
     `name`/`parameters` for every prompt, worked out by hand from what the prompt actually asks for,
@@ -264,7 +264,7 @@ JSON fixtures — the same way a user would actually invoke the program.
     the accuracy tally.
   - A markdown report — overall and per-scenario function-name accuracy, parameter accuracy (numeric
     values compared with a small tolerance rather than exact string equality), and malformed-input
-    robustness, plus a full per-prompt pass/fail table — is written to `claude/test-reports/`, one
+    robustness, plus a full per-prompt pass/fail table — is written to `tests/test-reports/`, one
     timestamped file per run, so accuracy can be tracked over time as the implementation changes.
 - Bugs surfaced by this testing were written up as GitHub-issue-style documents under
   `claude/issues/` (see "Challenges faced" above) with exact repro commands, rather than just fixed
@@ -295,8 +295,8 @@ To run against custom functions/prompts, or a different model:
 
 ```sh
 uv run python -m src \
-  --functions_definition claude/test_cases/multi_param_types/functions_definition.json \
-  --input claude/test_cases/multi_param_types/function_calling_tests.json \
+  --functions_definition tests/test_cases/multi_param_types/functions_definition.json \
+  --input tests/test_cases/multi_param_types/function_calling_tests.json \
   --output data/output/multi_param_types.json \
   --model Qwen/Qwen3-0.6B
 ```
@@ -318,8 +318,8 @@ this produces:
 }
 ```
 
-To grade the implementation's accuracy against every scenario under `claude/test_cases/` and write
-a fresh report to `claude/test-reports/`:
+To grade the implementation's accuracy against every scenario under `tests/test_cases/` and write
+a fresh report to `tests/test-reports/`:
 
 ```sh
 make test

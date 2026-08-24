@@ -26,9 +26,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
-TEST_CASES_DIR = ROOT / "claude" / "test_cases"
+TEST_CASES_DIR = ROOT / "tests" / "test_cases"
 MALFORMED_DIR = TEST_CASES_DIR / "malformed_inputs"
-REPORTS_DIR = ROOT / "claude" / "test-reports"
+REPORTS_DIR = ROOT / "tests" / "test-reports"
 SCRATCH_OUTPUT = ROOT / "data" / "output" / "_run_tests_scratch.json"
 
 JSONObject = Dict[str, object]

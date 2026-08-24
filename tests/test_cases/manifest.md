@@ -3,26 +3,22 @@
 Each subdirectory is a `functions_definition.json` + `function_calling_tests.json` pair meant to be
 run directly against `src` (not submitted/graded, per the subject's "Additional Guidelines").
 
-Note: as of commit `eafca7a` ("fix: allow output file to go in any directory"), `--output` accepts
-a full path (parent directories are created automatically), so the commands below pass a path
-under `data/output/` directly.
-
 ## Happy-path scenarios
 
 ```sh
 uv run python -m src \
-  --functions_definition claude/test_cases/multi_param_types/functions_definition.json \
-  --input claude/test_cases/multi_param_types/function_calling_tests.json \
+  --functions_definition tests/test_cases/multi_param_types/functions_definition.json \
+  --input tests/test_cases/multi_param_types/function_calling_tests.json \
   --output data/output/multi_param_types.json
 
 uv run python -m src \
-  --functions_definition claude/test_cases/edge_values/functions_definition.json \
-  --input claude/test_cases/edge_values/function_calling_tests.json \
+  --functions_definition tests/test_cases/edge_values/functions_definition.json \
+  --input tests/test_cases/edge_values/function_calling_tests.json \
   --output data/output/edge_values.json
 
 uv run python -m src \
-  --functions_definition claude/test_cases/ambiguous_and_adversarial/functions_definition.json \
-  --input claude/test_cases/ambiguous_and_adversarial/function_calling_tests.json \
+  --functions_definition tests/test_cases/ambiguous_and_adversarial/functions_definition.json \
+  --input tests/test_cases/ambiguous_and_adversarial/function_calling_tests.json \
   --output data/output/ambiguous_and_adversarial.json
 ```
 
@@ -38,18 +34,18 @@ uv run python -m src \
 
 ```sh
 uv run python -m src \
-  --functions_definition claude/test_cases/new_functions/functions_definition.json \
-  --input claude/test_cases/new_functions/function_calling_tests.json \
+  --functions_definition tests/test_cases/new_functions/functions_definition.json \
+  --input tests/test_cases/new_functions/function_calling_tests.json \
   --output data/output/new_functions.json
 
 uv run python -m src \
-  --functions_definition claude/test_cases/extreme_edge_cases/functions_definition.json \
-  --input claude/test_cases/extreme_edge_cases/function_calling_tests.json \
+  --functions_definition tests/test_cases/extreme_edge_cases/functions_definition.json \
+  --input tests/test_cases/extreme_edge_cases/function_calling_tests.json \
   --output data/output/extreme_edge_cases.json
 
 uv run python -m src \
-  --functions_definition claude/test_cases/injection_guard_robustness/functions_definition.json \
-  --input claude/test_cases/injection_guard_robustness/function_calling_tests.json \
+  --functions_definition tests/test_cases/injection_guard_robustness/functions_definition.json \
+  --input tests/test_cases/injection_guard_robustness/function_calling_tests.json \
   --output data/output/injection_guard_robustness.json
 ```
 
@@ -85,26 +81,26 @@ a clear message, graceful exit.
 ```sh
 # Invalid JSON syntax (trailing comma) -> Arguments.validate_model's json.JSONDecodeError branch
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/invalid_json.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/invalid_json.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_invalid_json.json
 
 # Missing "returns" key
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/functions_missing_returns.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/functions_missing_returns.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_missing_returns.json
 
 # Extra top-level key (5 entries instead of 4)
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/functions_extra_key.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/functions_extra_key.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_extra_key.json
 
 # Wrong types for description/parameters
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/functions_wrong_types.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/functions_wrong_types.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_wrong_types.json
 
 # Parameter type outside the ParameterType enum ("array")
@@ -112,43 +108,43 @@ uv run python -m src \
 # Parameter(type=ParameterType(value["type"])) with no try/except) -- caught only by
 # __main__.py's blanket handler, which prints a traceback but still exits 0 with no output file.
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/functions_bad_parameter_type.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/functions_bad_parameter_type.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_bad_parameter_type.json
 
 # Zero functions available at all
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/functions_empty.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/functions_empty.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_empty_functions.json
 
 # Prompt object missing the "prompt" key
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/valid_minimal_functions.json \
-  --input claude/test_cases/malformed_inputs/prompts_missing_prompt_key.json \
+  --functions_definition tests/test_cases/malformed_inputs/valid_minimal_functions.json \
+  --input tests/test_cases/malformed_inputs/prompts_missing_prompt_key.json \
   --output data/output/malformed_missing_prompt_key.json
 
 # Prompt value is not a string
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/valid_minimal_functions.json \
-  --input claude/test_cases/malformed_inputs/prompts_non_string.json \
+  --functions_definition tests/test_cases/malformed_inputs/valid_minimal_functions.json \
+  --input tests/test_cases/malformed_inputs/prompts_non_string.json \
   --output data/output/malformed_prompt_non_string.json
 
 # Extra key on a prompt object
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/valid_minimal_functions.json \
-  --input claude/test_cases/malformed_inputs/prompts_extra_key.json \
+  --functions_definition tests/test_cases/malformed_inputs/valid_minimal_functions.json \
+  --input tests/test_cases/malformed_inputs/prompts_extra_key.json \
   --output data/output/malformed_prompt_extra_key.json
 
 # Zero prompts at all (valid empty array)
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/valid_minimal_functions.json \
-  --input claude/test_cases/malformed_inputs/prompts_empty_array.json \
+  --functions_definition tests/test_cases/malformed_inputs/valid_minimal_functions.json \
+  --input tests/test_cases/malformed_inputs/prompts_empty_array.json \
   --output data/output/malformed_empty_prompts.json
 
 # Missing file entirely (no fixture needed)
 uv run python -m src \
-  --functions_definition claude/test_cases/malformed_inputs/does_not_exist.json \
-  --input claude/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --functions_definition tests/test_cases/malformed_inputs/does_not_exist.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_missing_file.json
 ```
