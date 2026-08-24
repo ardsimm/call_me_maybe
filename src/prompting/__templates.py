@@ -6,16 +6,22 @@ from src.generate.generator_exceptions import GenerationError
 
 
 class TemplateDirectories(StrEnum):
+    """Directories holding the raw prompt template `.txt` files."""
+
     FUNCTION_NAMES_PATH = ("data/templates/function_names",)
     FUNCTION_PARAMETERS_PATH = "data/templates/function_parameters"
 
 
 class FunctionNamesTemplates(StrEnum):
+    """Filenames of the function-name-selection prompt templates."""
+
     FUNCTION_NAME_MAIN = ("function_name_main_template.txt",)
     FUNCTION_NAME_OPTIONS = "function_name_option_template.txt"
 
 
 class FunctionParametersTemplates(StrEnum):
+    """Filenames of the function-parameter-generation prompt templates."""
+
     FUNCTION_PARAMETER_OPTION = "function_parameter_option_template.txt"
     FUNCTION_PARAMETERS_MAIN = "function_parameters_main_template.txt"
     GENERATED_PARAMETER_TEMPLATE = "generated_parameter_template.txt"
@@ -23,11 +29,25 @@ class FunctionParametersTemplates(StrEnum):
 
 
 class PromptingTemplates:
+    """Builds prompt strings by filling in cached template files.
+
+    Templates are plain text files containing `{[PLACEHOLDER]}` markers,
+    lazily loaded once into `__templates` on first use and reused for
+    every subsequent prompt.
+    """
 
     __templates: Optional[Dict[str, str]] = None
 
     @classmethod
     def __load_templates(cls) -> None:
+        """Read every template file into `__templates`, keyed by filename.
+
+        Raises
+        ------
+        IOError
+            If any template file under `TemplateDirectories` cannot be
+            opened or read.
+        """
         cls.__templates = {}
         for function_name_template in FunctionNamesTemplates:
             with open(
@@ -53,6 +73,19 @@ class PromptingTemplates:
 
     @classmethod
     def __get_templates(cls) -> Dict[str, str]:
+        """Return the cached templates, loading them on first call.
+
+        Returns
+        -------
+        dict of str to str
+            Every template's contents, keyed by filename.
+
+        Raises
+        ------
+        GenerationError
+            Wrapping an `IOError` from `__load_templates` if a template
+            file cannot be read.
+        """
         if cls.__templates is None:
             try:
                 cls.__load_templates()
@@ -67,6 +100,27 @@ class PromptingTemplates:
     def get_function_name_template(
         cls, user_prompt: str, functions: List[Function]
     ) -> str:
+        """Build the prompt asking the model to choose a function name.
+
+        Parameters
+        ----------
+        user_prompt : str
+            The user's natural-language request.
+        functions : list of Function
+            Every candidate function, each rendered as one option in the
+            prompt.
+
+        Returns
+        -------
+        str
+            The filled-in function-name-selection prompt.
+
+        Raises
+        ------
+        GenerationError
+            Forwarded from `__get_templates` if a template file cannot
+            be read.
+        """
         function_name_main_template = str(
             cls.__get_templates().get(
                 FunctionNamesTemplates.FUNCTION_NAME_MAIN
@@ -93,6 +147,27 @@ class PromptingTemplates:
     def get_function_parameters_template(
         cls, user_prompt: str, function: Function
     ) -> str:
+        """Build the prompt introducing `function`'s parameters.
+
+        Parameters
+        ----------
+        user_prompt : str
+            The user's natural-language request.
+        function : Function
+            The function whose parameters are about to be generated,
+            each rendered as one option in the prompt.
+
+        Returns
+        -------
+        str
+            The filled-in function-parameters prompt.
+
+        Raises
+        ------
+        GenerationError
+            Forwarded from `__get_templates` if a template file cannot
+            be read.
+        """
         function_parameter_main_template = str(
             cls.__get_templates().get(
                 FunctionParametersTemplates.FUNCTION_PARAMETERS_MAIN
@@ -135,6 +210,37 @@ class PromptingTemplates:
         next_parameter: Parameter,
         generated_parameter: Optional[Parameter] = None,
     ) -> str:
+        """Append the previous parameter's value and prompt for the next.
+
+        If `generated_parameter` was already generated (i.e. not `None`
+        and its `value` is set), its value is appended to `current_prompt`
+        first, so each parameter's prompt carries every prior parameter's
+        generated value as context. Then a request for `next_parameter`
+        is appended.
+
+        Parameters
+        ----------
+        current_prompt : str
+            The prompt built so far.
+        function : Function
+            The function whose parameters are being generated.
+        next_parameter : Parameter
+            The parameter to prompt for next.
+        generated_parameter : Parameter, optional
+            The most recently generated parameter, if any, appended to
+            `current_prompt` before the next request.
+
+        Returns
+        -------
+        str
+            The extended prompt, ready for `next_parameter`'s generation.
+
+        Raises
+        ------
+        GenerationError
+            Forwarded from `__get_templates` if a template file cannot
+            be read.
+        """
         generated_parameter_template = str(
             cls.__get_templates().get(
                 FunctionParametersTemplates.GENERATED_PARAMETER_TEMPLATE

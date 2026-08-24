@@ -22,24 +22,42 @@ Made with love and pain by ardsimm
 """
 
 
-MAX_LOG_SEPARATOR_LEN = len(HEADER.split("\n")[1]) + 1
+LOG_SEPARATOR_LEN = len(HEADER.split("\n")[1]) + 1
 
 
 class CallMeMaybe:
+    """Entry point orchestrating the full prompt-to-function-call pipeline.
+
+    Parses CLI arguments, loads/validates the functions definition and
+    prompts, generates a name and parameters per prompt, coerces each
+    parameter to its declared type, and writes every result out as JSON.
+    """
 
     @staticmethod
     def __strip_number(s: str) -> str:
-        # In specific cases, the LLM might generate the token `-"` or `-",`
-        # at the end of an number. With our logic loading every token
-        # containing unescaped quotes and using them as end
-        # sequences for our completion and since we strip the quotes after
-        # decoding, keeping the first non-quote character without any constrain
-        # we can get invalid numbers such as `-42-`.
-        # For instance:
-        # User: `Print the number "-42-4"``
-        # LLM: `-42-"`,
-        # After quotes stripping: number = `-42-`
-        # The following function is a workaround for this bug.
+        """Trim trailing non-digit characters merged into a number token.
+
+        In specific cases, the LLM might generate the token `-"` or `-",`
+        at the end of a number. Because every vocab token containing an
+        unescaped quote is used as a completion end sequence, and only
+        the text before that quote is kept, a merged token can leave
+        trailing garbage after the last digit, producing an invalid
+        number such as `-42-`. For example, given the prompt
+        `Print the number "-42-4"`, the model may generate `-42-"`;
+        after stripping the quote the value is `-42-`. This function
+        trims trailing non-digit characters off such a value.
+
+        Parameters
+        ----------
+        s : str
+            The raw parameter text, straight out of generation.
+
+        Returns
+        -------
+        str
+            `s` with any trailing non-digit characters removed. Returns
+            `""` if `s` contains no digit at all.
+        """
         s_len = len(s)
         while not s.endswith((
             "0",
@@ -59,27 +77,97 @@ class CallMeMaybe:
 
     @staticmethod
     def __get_arguments() -> Arguments:
+        """Parse `sys.argv` into a validated `Arguments`.
+
+        Returns
+        -------
+        Arguments
+            The parsed and validated CLI arguments.
+
+        Raises
+        ------
+        ParsingError
+            Forwarded from `Parser.parse` if an input file cannot be
+            opened or is not valid JSON.
+        ParsingValidationError
+            Forwarded from `Parser.parse` if the parsed arguments fail
+            pydantic validation.
+        """
         parser = ParserFactory.get_instance()
         return parser.parse(sys.argv[1:])
 
     @staticmethod
     def __get_context(arguments: Arguments) -> Context:
+        """Build the run `Context` from `arguments`.
+
+        Parameters
+        ----------
+        arguments : Arguments
+            The parsed CLI arguments naming the functions-definition and
+            prompts files.
+
+        Returns
+        -------
+        Context
+            The loaded functions and prompts.
+
+        Raises
+        ------
+        ParsingError
+            Forwarded from `Context.__init__` if a file cannot be opened,
+            is not valid JSON, or its content does not match the expected
+            shape.
+        """
         return Context(arguments)
 
     @classmethod
     def __process_prompt(cls, prompt: str, context: Context) -> OutputItem:
+        """Generate a function call for a single `prompt`.
+
+        Guards against prompt injection by refusing any prompt containing
+        `<|im_end|>` or `<|im_start|>` (the chat template's special
+        tokens) outright, returning an empty `OutputItem` for it instead
+        of generating. Otherwise generates a name, resolves it against
+        `context.functions`, generates its parameters, and coerces each
+        parameter's raw string value to its declared `ParameterType`
+        (`INT`/`FLOAT` values that fail to parse or overflow to infinity
+        fall back to `42`/`42.0`; an unrecognized `BOOL` value falls back
+        to `""`).
+
+        Parameters
+        ----------
+        prompt : str
+            The user's natural-language request.
+        context : Context
+            The loaded functions and prompts for this run.
+
+        Returns
+        -------
+        OutputItem
+            The prompt, chosen function name, and coerced parameters.
+
+        Raises
+        ------
+        GenerationError
+            If the generated name matches none of `context.functions`, or
+            forwarded from `Generator.generate_name`/`generate_parameters`.
+        ValueError
+            Forwarded from `Generator.generate_name`/`generate_parameters`.
+        """
         generator = GeneratorFactory.get_instance()
         item: OutputItem = {"prompt": "", "name": "", "parameters": {}}
         item["prompt"] = prompt
         print(
-            "\n" + "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
-            "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
+            "\n" + "=" * LOG_SEPARATOR_LEN,
+            "=" * LOG_SEPARATOR_LEN,
             prompt,
-            "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
-            "=" * min(len(prompt), MAX_LOG_SEPARATOR_LEN),
+            "=" * LOG_SEPARATOR_LEN,
+            "=" * LOG_SEPARATOR_LEN,
             sep="\n",
         )
         if "<|im_end|>" in prompt or "<|im_start|>" in prompt:
+            # This.. this is proper anti prompt injection code right there
+            # OpenAI aint got nothing on me
             print("Nice try, not computing this one :p")
             return {"prompt": prompt, "name": "", "parameters": {}}
 
@@ -105,6 +193,7 @@ class CallMeMaybe:
                     )
                     parsed_parameter = int(parameter.value)
                     if math.isinf(parsed_parameter):
+                        # Python is a FAKE language made by CRAZY people
                         raise ValueError("Int parameter overflowed")
                 except ValueError as err:
                     print(
@@ -120,6 +209,7 @@ class CallMeMaybe:
                     )
                     parsed_parameter = float(parameter.value)
                     if math.isinf(parsed_parameter):
+                        # Python is a FAKE language made by CRAZY people
                         raise ValueError("Float parameter overflowed")
                 except ValueError as err:
                     print(f"Failed to generate float parameter {
@@ -158,6 +248,22 @@ class CallMeMaybe:
 
     @classmethod
     def __process_prompts(cls, context: Context) -> List[OutputItem]:
+        """Generate a function call for every prompt in `context`.
+
+        A `GenerationError` from any single prompt is caught and logged
+        so one bad prompt does not abort the whole batch; that prompt's
+        `OutputItem` is appended with an empty name and parameters.
+
+        Parameters
+        ----------
+        context : Context
+            The loaded functions and prompts for this run.
+
+        Returns
+        -------
+        list of OutputItem
+            One item per prompt in `context.prompts`, in order.
+        """
         items: List[OutputItem] = []
 
         for prompt in context.prompts:
@@ -173,6 +279,26 @@ class CallMeMaybe:
 
     @staticmethod
     def __write_output(items: List[OutputItem], arguments: Arguments) -> None:
+        """Serialize `items` to JSON and write them to `arguments.output`.
+
+        Creates any missing parent directories of the output path.
+
+        Parameters
+        ----------
+        items : list of OutputItem
+            The results to write out.
+        arguments : Arguments
+            Carries the output file path.
+
+        Raises
+        ------
+        SerializationException
+            Forwarded from `JSONAdapter.serialize` if `items` is not
+            JSON-serializable.
+        OSError
+            If the output file or its parent directories cannot be
+            created or written.
+        """
         adapter = AdapterFactory.get_instance(AdapterType.JSON)
         print("\nWriting result to output file...")
         serialized = adapter.serialize(items)
@@ -183,6 +309,20 @@ class CallMeMaybe:
 
     @classmethod
     def run(cls) -> None:
+        """Run the full pipeline: parse args, generate, write output.
+
+        Parsing/validation failures, an empty prompts file,
+        serialization failures, and output write failures are all caught
+        and logged here, returning early instead of propagating -- only
+        a `GenerationError` from an individual prompt's own failure is
+        handled earlier, in `__process_prompts`.
+
+        Raises
+        ------
+        Exception
+            Anything not explicitly caught above propagates uncaught to
+            `__main__`, which prints a traceback and exits with status 1.
+        """
         print(HEADER)
         try:
             arguments: Arguments = cls.__get_arguments()
