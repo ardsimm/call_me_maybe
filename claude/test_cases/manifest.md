@@ -36,6 +36,44 @@ uv run python -m src \
   straddle two functions at once, gibberish, and prompt-injection attempts (fake chat-template
   turns, "ignore previous instructions").
 
+```sh
+uv run python -m src \
+  --functions_definition claude/test_cases/new_functions/functions_definition.json \
+  --input claude/test_cases/new_functions/function_calling_tests.json \
+  --output data/output/new_functions.json
+
+uv run python -m src \
+  --functions_definition claude/test_cases/extreme_edge_cases/functions_definition.json \
+  --input claude/test_cases/extreme_edge_cases/function_calling_tests.json \
+  --output data/output/extreme_edge_cases.json
+
+uv run python -m src \
+  --functions_definition claude/test_cases/injection_guard_robustness/functions_definition.json \
+  --input claude/test_cases/injection_guard_robustness/function_calling_tests.json \
+  --output data/output/injection_guard_robustness.json
+```
+
+- `new_functions`: brand-new function domains not covered elsewhere (`fn_run_sql`, `fn_send_email`,
+  `fn_convert_currency`, `fn_schedule_reminder`, `fn_ban_user`, `fn_calculate_tax`, and
+  `fn_get_current_time` -- a zero-parameter function), with prompts including raw SQL (single
+  quotes, semicolons, an injection-flavored `DROP TABLE ...; --`), multiple quoted string
+  parameters in one call, and several parameters phrased as indirect negation/affirmation
+  (`"don't repeat it"`, `"make it permanent"`, `"Temporarily ban"`).
+- `extreme_edge_cases`: triple-nested quotes, a ~470-character value to probe the
+  `TOKEN_GEN_LIMIT` boundary, a symbol-only string, scientific notation in the source prompt
+  (`FloatState` has no `e`/`+` support), a 52-digit negative number, all-caps input, indirect
+  boolean phrasing, a single-word prompt, a whitespace-only string, and unicode
+  punctuation/accents. See `report_4` -- the scientific-notation case surfaces a real bug (see
+  below).
+- `injection_guard_robustness`: reruns the original prompt-injection attack with the
+  `<|im_end|>`/`<|im_start|>` guard's exact casing changed to uppercase, with extra internal
+  whitespace, and swapped for a different real special token (`<|endoftext|>`) entirely, to map
+  the guard's actual boundaries rather than just its one known-caught case.
+
+**Known issue surfaced by `extreme_edge_cases`**: `"What is the sum of 6.022e23 and 1"` produces
+`{"a": 6.022, "b": Infinity}` -- `Infinity` is not valid JSON (RFC 8259). Full trace and root cause
+in `claude/reports/report_4_20260824-125422.md`.
+
 ## Error-handling scenarios (malformed_inputs/)
 
 Each bad file is paired with `valid_minimal_functions.json` / `valid_minimal_prompts.json` to
