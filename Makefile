@@ -5,10 +5,10 @@ TEST_NAME = run_tests
 $(VENV): pyproject.toml
 	uv sync
 
-install: $(VENV)
-
 run: install
 	uv run python -m src
+
+install: $(VENV)
 
 debug: install
 	uv run python -m pdb src/__main__.py
