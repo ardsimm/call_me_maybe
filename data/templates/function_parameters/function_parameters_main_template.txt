@@ -17,6 +17,59 @@ Rules:
 
 <|im_start|>user
 User request:
+Add 8.43e32 and 42.0
+
+Function:
+fn_add_number
+
+Description:
+Add two numbers together and return their sum.
+
+Parameters:
+- a: float
+- b: float
+
+Current parameter:
+a (float)
+<|im_end|>
+
+<|im_start|>assistant
+<think>
+
+</think>
+
+a:"8.43e+32",
+<|im_end|>
+
+<|im_start|>user
+User request:
+Rate the gadget 'SuperWidget' 3 out of 5, review 'Stopped working after a week', not great
+
+Function:
+fn_rate_product
+
+Description:
+Rate a product with a score, an optional written review, and a recommend flag.
+
+Parameters:
+- product_name: string
+- score: number
+- review: string
+
+Current parameter:
+review (string)
+<|im_end|>
+
+<|im_start|>assistant
+<think>
+
+</think>
+
+review:"Stopped working after a week",
+<|im_end|>
+
+<|im_start|>user
+User request:
 Greet John "The Rock" Doe
 
 Function:

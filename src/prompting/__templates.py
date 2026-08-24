@@ -67,9 +67,11 @@ class PromptingTemplates:
     def get_function_name_template(
         cls, user_prompt: str, functions: List[Function]
     ) -> str:
-        function_name_main_template = str(cls.__get_templates().get(
-            FunctionNamesTemplates.FUNCTION_NAME_MAIN
-        ))
+        function_name_main_template = str(
+            cls.__get_templates().get(
+                FunctionNamesTemplates.FUNCTION_NAME_MAIN
+            )
+        )
         function_options_template = str(
             cls.__get_templates().get(
                 FunctionNamesTemplates.FUNCTION_NAME_OPTIONS
@@ -91,12 +93,16 @@ class PromptingTemplates:
     def get_function_parameters_template(
         cls, user_prompt: str, function: Function
     ) -> str:
-        function_parameter_main_template = str(cls.__get_templates().get(
-            FunctionParametersTemplates.FUNCTION_PARAMETERS_MAIN
-        ))
-        function_parameter_option_template = str(cls.__get_templates().get(
-            FunctionParametersTemplates.FUNCTION_PARAMETER_OPTION
-        ))
+        function_parameter_main_template = str(
+            cls.__get_templates().get(
+                FunctionParametersTemplates.FUNCTION_PARAMETERS_MAIN
+            )
+        )
+        function_parameter_option_template = str(
+            cls.__get_templates().get(
+                FunctionParametersTemplates.FUNCTION_PARAMETER_OPTION
+            )
+        )
         parameter_options = "\n".join(
             [
                 function_parameter_option_template.replace(
@@ -129,19 +135,24 @@ class PromptingTemplates:
         next_parameter: Parameter,
         generated_parameter: Optional[Parameter] = None,
     ) -> str:
-        generated_parameter_template = str(cls.__get_templates().get(
-            FunctionParametersTemplates.GENERATED_PARAMETER_TEMPLATE
-        ))
-        ungenerated_parameter_template = str(cls.__get_templates().get(
-            FunctionParametersTemplates.UNGENERATED_PARAMETER_TEMPLATE
-        ))
+        generated_parameter_template = str(
+            cls.__get_templates().get(
+                FunctionParametersTemplates.GENERATED_PARAMETER_TEMPLATE
+            )
+        )
+        ungenerated_parameter_template = str(
+            cls.__get_templates().get(
+                FunctionParametersTemplates.UNGENERATED_PARAMETER_TEMPLATE
+            )
+        )
         if (
             generated_parameter is not None
             and generated_parameter.value is not None
         ):
             current_prompt += (
-                generated_parameter_template
-                .replace("{[PARAMETER_VALUE]}", generated_parameter.value)
+                generated_parameter_template.replace(
+                    "{[PARAMETER_VALUE]}", generated_parameter.value
+                )
                 + "\n"
             )
         return (

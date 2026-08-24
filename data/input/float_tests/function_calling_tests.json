@@ -1,0 +1,26 @@
+[
+    {
+        "prompt": "What is the sum of 6.022e23 and 1"
+    },
+    {
+        "prompt": "What is the sum of 6.022e+23 and 1"
+    },
+    {
+        "prompt": "What is the sum of 6.022e-23 and 1"
+    },
+    {
+        "prompt": "What is the sum of -6.022e-23 and 1"
+    },
+    {
+        "prompt": "What is the sum of -6.022e+23 and 1"
+    },
+    {
+        "prompt": "What is the sum of 6.0 and 1"
+    },
+    {
+        "prompt": "What is the sum of -6.0 and 1"
+    },
+    {
+        "prompt": "What is the sum of -99999999999999999999999999999999999999999999999999 and 1"
+    }
+]

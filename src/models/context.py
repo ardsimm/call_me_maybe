@@ -49,13 +49,12 @@ class Context(BaseModel):
                 errors.append("Invalid type for parameters in function")
             if returns is not None and not isinstance(returns, dict):
                 errors.append("Invalid type for returns in function")
-            if (len(function_dict.items()) > 4):
+            if len(function_dict.items()) > 4:
                 errors.append("Too many entries in function")
-            if (len(errors)):
+            if len(errors):
                 raise ParsingError(
-                    "Missing or invalid fields in function:\n" + (
-                        "\n".join(" - " + error for error in errors)
-                    )
+                    "Missing or invalid fields in function:\n"
+                    + ("\n".join(" - " + error for error in errors))
                 )
             try:
                 function = Function(
@@ -77,7 +76,7 @@ class Context(BaseModel):
                     raise ParsingError(
                         "Missing or invalid value in prompts file"
                     )
-                if (len(prompt_dict.items()) != 1):
+                if len(prompt_dict.items()) != 1:
                     raise ParsingError("Too many entries in prompt")
                 self.prompts.append(prompt)
         if len(self.prompts) and not len(self.functions):

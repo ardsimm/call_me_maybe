@@ -19,8 +19,7 @@ class Arguments(BaseModel):
         min_length=6, default="data/input/function_calling_tests.json"
     )
     output: str = Field(
-        min_length=6,
-        default="data/output/function_calls.json"
+        min_length=6, default="data/output/function_calls.json"
     )
     model: str = Field(min_length=3, default="Qwen/Qwen3-0.6B")
 

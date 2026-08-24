@@ -18,19 +18,10 @@ class State:
     __current_stage_idx: int
 
     def __init__(self) -> None:
-        self._tokenizer = TokenizerFactory.get_instance(
-            TokenizerType.DEFAULT
-        )
+        self._tokenizer = TokenizerFactory.get_instance(TokenizerType.DEFAULT)
         self.__current_stage_idx = 0
 
-    @property
-    def current_stage(self) -> StateStage:
-        return self._stages[self.__current_stage_idx]
-
-    def get_allowed_tokens(self) -> Optional[List[int]]:
-        return self._stage_allowed_tokens.get(self.current_stage)
-
-    def update_last_token(self, token: int) -> None:
+    def _advance_stage(self, token: int) -> None:
         transition_tokens = self._stage_transition_tokens.get(
             self.current_stage
         )
@@ -38,3 +29,19 @@ class State:
             token in transition_tokens or not len(transition_tokens)
         ):
             self.__current_stage_idx += 1
+            print("Current stage:", self.current_stage.name)
+
+    @property
+    def current_stage(self) -> StateStage:
+        return self._stages[self.__current_stage_idx]
+
+    @current_stage.setter
+    def current_stage(self, stage: StateStage) -> None:
+        self.__current_stage_idx = self._stages.index(stage)
+        print("Current stage:", self.current_stage.name)
+
+    def get_allowed_tokens(self) -> Optional[List[int]]:
+        return self._stage_allowed_tokens.get(self.current_stage)
+
+    def update_last_token(self, token: int) -> None:
+        self._advance_stage(token)

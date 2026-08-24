@@ -20,14 +20,14 @@ class GeneratorImpl(Generator):
                 escape_count += 1
                 idx += 1
                 continue
-            if char == "\"" and not escape_count % 2:
+            if char == '"' and not escape_count % 2:
                 return idx
             escape_count = 0
             idx += 1
         return -1
 
     def __strip_completion(self, completion: str) -> str:
-        return completion[:self.__find_unescapted_quote_idx(completion)]
+        return completion[: self.__find_unescapted_quote_idx(completion)]
 
     def __handle_escaped_quotes(self, completion: str) -> str:
         return completion.replace('\\"', '"')
@@ -38,6 +38,8 @@ class GeneratorImpl(Generator):
         token = constrainer.pick_token(
             self.model.get_logits_from_input_ids(result)
         )
+        if token is not None:
+            print("Generated: ", self.tokenizer.decode([token]))
         return token
 
     def __get_completion(self, prompt: str, constrainer: Constrainer) -> str:
@@ -120,10 +122,12 @@ class GeneratorImpl(Generator):
             last_parameter = Parameter(
                 name=parameter.name, type=parameter.type, value=parameter.value
             )
-            parameters.append(Parameter(
-                name=parameter.name,
-                type=parameter.type,
-                value=self.__handle_escaped_quotes(parameter.value)
-            ))
+            parameters.append(
+                Parameter(
+                    name=parameter.name,
+                    type=parameter.type,
+                    value=self.__handle_escaped_quotes(parameter.value),
+                )
+            )
 
         return parameters

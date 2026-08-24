@@ -11,7 +11,6 @@ from typing import List, Union
 import sys
 from pathlib import Path
 
-
 HEADER = r"""           _ _                                              _
   ___ __ _| | |    _ __ ___   ___     _ __ ___   __ _ _   _| |__   ___
  / __/ _` | | |   | '_ ` _ \ / _ \   | '_ ` _ \ / _` | | | | '_ \ / _ \
@@ -23,9 +22,7 @@ Made with love and pain by ardsimm
 """
 
 
-MAX_LOG_SEPARATOR_LEN = len(
-    HEADER.split("\n")[1]
-) + 1
+MAX_LOG_SEPARATOR_LEN = len(HEADER.split("\n")[1]) + 1
 
 
 class CallMeMaybe:
@@ -79,7 +76,7 @@ class CallMeMaybe:
                 except ValueError as err:
                     print(
                         f"Failed to generate int parameter {parameter.name}:",
-                        err.__str__()
+                        err.__str__(),
                     )
                     parsed_parameter = 42
 
@@ -89,12 +86,9 @@ class CallMeMaybe:
                     if math.isinf(parsed_parameter):
                         raise ValueError("Float parameter overflowed")
                 except ValueError as err:
-                    print(
-                        f"Failed to generate float parameter {
+                    print(f"Failed to generate float parameter {
                             parameter.name
-                        }:",
-                        err.__str__()
-                    )
+                        }:", err.__str__())
                     parsed_parameter = 42.0
 
             elif parameter.type == ParameterType.BOOL:
@@ -108,7 +102,7 @@ class CallMeMaybe:
                 else:
                     print(
                         f"Failed to generate parameter {parameter.name}:",
-                        f"Invalid boolean value :{parameter.value}"
+                        f"Invalid boolean value :{parameter.value}",
                     )
                     parsed_parameter = ""
 
@@ -148,9 +142,7 @@ class CallMeMaybe:
         serialized = adapter.serialize(items)
         output_file_path = Path(arguments.output)
         output_file_path.parent.mkdir(exist_ok=True, parents=True)
-        with open(
-            output_file_path, mode="w"
-        ) as output_file:
+        with open(output_file_path, mode="w") as output_file:
             output_file.write(serialized)
 
     @classmethod
