@@ -28,7 +28,7 @@ MAX_LOG_SEPARATOR_LEN = len(HEADER.split("\n")[1]) + 1
 class CallMeMaybe:
 
     @staticmethod
-    def __strip_trailing_minus_sign(s: str) -> str:
+    def __strip_number(s: str) -> str:
         # In specific cases, the LLM might generate the token `-"` or `-",`
         # at the end of an number. With our logic loading every token
         # containing unescaped quotes and using them as end
@@ -39,9 +39,20 @@ class CallMeMaybe:
         # User: `Print the number "-42-4"``
         # LLM: `-42-"`,
         # After quotes stripping: number = `-42-`
-        # The following function is a workaround for this bug,
+        # The following function is a workaround for this bug.
         s_len = len(s)
-        while s.endswith("-"):
+        while not s.endswith((
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+        )):
             s = s[:s_len - 1]
             s_len -= 1
         return s
@@ -89,7 +100,7 @@ class CallMeMaybe:
             assert parameter.value is not None
             if parameter.type == ParameterType.INT:
                 try:
-                    parameter.value = cls.__strip_trailing_minus_sign(
+                    parameter.value = cls.__strip_number(
                         parameter.value
                     )
                     parsed_parameter = int(parameter.value)
@@ -104,7 +115,7 @@ class CallMeMaybe:
 
             elif parameter.type == ParameterType.FLOAT:
                 try:
-                    parameter.value = cls.__strip_trailing_minus_sign(
+                    parameter.value = cls.__strip_number(
                         parameter.value
                     )
                     parsed_parameter = float(parameter.value)
