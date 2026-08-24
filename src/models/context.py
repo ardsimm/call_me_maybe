@@ -49,8 +49,8 @@ class Context(BaseModel):
                 errors.append("Invalid type for parameters in function")
             if returns is not None and not isinstance(returns, dict):
                 errors.append("Invalid type for returns in function")
-            if (len(function_dict.items()) != 4):
-                errors.append("To many entries in function")
+            if (len(function_dict.items()) > 4):
+                errors.append("Too many entries in function")
             if (len(errors)):
                 raise ParsingError(
                     "Missing or invalid fields in function:\n" + (
