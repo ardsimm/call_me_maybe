@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEST_CASES_DIR = ROOT / "tests" / "test_cases"
 MALFORMED_DIR = TEST_CASES_DIR / "malformed_inputs"
 REPORTS_DIR = ROOT / "tests" / "test-reports"
-SCRATCH_OUTPUT = ROOT / "data" / "output" / "_run_tests_scratch.json"
+STDOUT = ROOT / "outputs" / "last_run_stdout.log"
 
 JSONObject = Dict[str, object]
 
@@ -60,9 +60,11 @@ class ScenarioReport:
 
 @dataclass
 class MalformedCase:
+    name: str
     description: str
     functions_definition: Path
     input_path: Path
+    output_path: Path
 
 
 @dataclass
@@ -74,59 +76,81 @@ class RobustnessCheck:
 
 MALFORMED_CASES: List[MalformedCase] = [
     MalformedCase(
+        "invalid_syntax",
         "Invalid JSON syntax (trailing comma)",
         MALFORMED_DIR / "invalid_json.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/invalid_syntax.json",
     ),
     MalformedCase(
+        "missing_returns",
         "Missing 'returns' key",
         MALFORMED_DIR / "functions_missing_returns.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/missing_returns.json",
     ),
     MalformedCase(
+        "extra_top_level_key",
         "Extra top-level key on a function",
         MALFORMED_DIR / "functions_extra_key.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/extra_top_level_key.json",
     ),
     MalformedCase(
+        "functions_wrong_types",
         "Wrong types for description/parameters",
         MALFORMED_DIR / "functions_wrong_types.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/functions_wrong_types.json",
     ),
     MalformedCase(
+        "functions_bad_parameters",
         "Parameter type outside the ParameterType enum",
         MALFORMED_DIR / "functions_bad_parameter_type.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/functions_bad_parameters.json",
     ),
     MalformedCase(
+        "functions_empty",
         "Zero functions available at all",
         MALFORMED_DIR / "functions_empty.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/functions_empty.json",
     ),
     MalformedCase(
+        "missing_prompt",
         "Prompt object missing the 'prompt' key",
         MALFORMED_DIR / "valid_minimal_functions.json",
         MALFORMED_DIR / "prompts_missing_prompt_key.json",
+        MALFORMED_DIR / "output/missing_prompt.json",
     ),
     MalformedCase(
+        "prompts_non_string",
         "Prompt value is not a string",
         MALFORMED_DIR / "valid_minimal_functions.json",
         MALFORMED_DIR / "prompts_non_string.json",
+        MALFORMED_DIR / "output/prompts_non_string.json",
     ),
     MalformedCase(
+        "prompts_extra_key",
         "Extra key on a prompt object",
         MALFORMED_DIR / "valid_minimal_functions.json",
         MALFORMED_DIR / "prompts_extra_key.json",
+        MALFORMED_DIR / "output/prompts_extra_key.json",
     ),
     MalformedCase(
+        "prompts_empty_array",
         "Zero prompts at all (valid empty array)",
         MALFORMED_DIR / "valid_minimal_functions.json",
         MALFORMED_DIR / "prompts_empty_array.json",
+        MALFORMED_DIR / "output/prompts_empty_array.json",
     ),
     MalformedCase(
+        "does_not_exist",
         "Missing functions_definition file entirely",
         MALFORMED_DIR / "does_not_exist.json",
         MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/does_not_exist.json",
     ),
 ]
 
@@ -150,7 +174,11 @@ def load_json_array(path: Path) -> List[JSONObject]:
 
 
 def run_program(
-    functions_definition: Path, input_path: Path, output_path: Path
+    functions_definition: Path,
+    input_path: Path,
+    output_path: Path,
+    stdout: Path,
+    stderr: Path,
 ) -> int:
     """Run `python -m src` against a functions/prompts pair.
 
@@ -168,24 +196,27 @@ def run_program(
     int
         The process's exit code.
     """
-    result = subprocess.run(
-        [
-            "uv",
-            "run",
-            "python",
-            "-m",
-            "src",
-            "--functions_definition",
-            str(functions_definition),
-            "--input",
-            str(input_path),
-            "--output",
-            str(output_path),
-        ],
-        cwd=ROOT,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    stdout.parent.mkdir(exist_ok=True, parents=True)
+    stderr.parent.mkdir(exist_ok=True, parents=True)
+    with open(stdout, "w") as stdout_file, open(stderr, "w") as stderr_file:
+        result = subprocess.run(
+            [
+                "uv",
+                "run",
+                "python",
+                "-m",
+                "src",
+                "--functions_definition",
+                str(functions_definition),
+                "--input",
+                str(input_path),
+                "--output",
+                str(output_path),
+            ],
+            cwd=ROOT,
+            stdout=stdout_file,
+            stderr=stderr_file,
+        )
     return result.returncode
 
 
@@ -213,9 +244,7 @@ def values_match(expected: object, actual: Optional[object]) -> bool:
         return False
     if isinstance(expected, bool) or isinstance(actual, bool):
         return expected is actual
-    if isinstance(expected, (int, float)) and isinstance(
-        actual, (int, float)
-    ):
+    if isinstance(expected, (int, float)) and isinstance(actual, (int, float)):
         return abs(float(expected) - float(actual)) < 1e-6
     return expected == actual
 
@@ -242,11 +271,19 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
 
     functions_definition = scenario_dir / "functions_definition.json"
     input_path = scenario_dir / "function_calling_tests.json"
-    run_program(functions_definition, input_path, SCRATCH_OUTPUT)
+    run_program(
+        functions_definition,
+        input_path,
+        ROOT / "tests" / "output" / f"{scenario_dir.name}.json",
+        ROOT / "tests" / "stdout" / f"{scenario_dir.name}_stdout.log",
+        ROOT / "tests" / "stderr" / f"{scenario_dir.name}_stderr.log",
+    )
 
     prompts = load_json_array(input_path)
     expected_items = load_json_array(expected_path)
-    actual_items = load_json_array(SCRATCH_OUTPUT)
+    actual_items = load_json_array(
+        ROOT / "tests" / "output" / f"{scenario_dir.name}.json"
+    )
 
     prompt_checks: List[PromptCheck] = []
     for prompt_obj, expected, actual in zip(
@@ -292,9 +329,52 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
             )
         )
 
-    return ScenarioReport(
+    report = ScenarioReport(
         scenario=scenario_dir.name, prompt_checks=prompt_checks
     )
+
+    graded = [check for check in report.prompt_checks if not check.skipped]
+    skipped_count = len(report.prompt_checks) - len(graded)
+    name_correct = sum(1 for check in graded if check.name_correct)
+    param_checks = [
+        parameter_check
+        for check in graded
+        for parameter_check in check.parameter_checks
+    ]
+    param_checks_len = len(param_checks)
+    param_correct = sum(1 for p in param_checks if p.correct)
+    graded_len = len(graded)
+
+    print("========================================================")
+    print(f"Ran {graded_len} prompt" + ("s" if graded_len > 1 else ""))
+    print(f"Ignored {skipped_count} prompts")
+    print(
+        f"{name_correct}/{graded_len} name"
+        + ("s" if name_correct > 1 else "")
+        + " correct",
+        f"({
+            (
+                100 * name_correct / graded_len
+                if graded_len > 0
+                else 0.0
+            ):.2f
+        }%)"
+    )
+    if param_checks_len:
+        print(
+            f"{param_correct}/{param_checks_len} params correct",
+            f"({
+                (
+                    100 * param_correct / param_checks_len
+                    if param_checks_len > 0
+                    else 0.0
+                ):.2f
+            }%)"
+        )
+    print("========================================================")
+    print("========================================================")
+
+    return report
 
 
 def evaluate_robustness() -> List[RobustnessCheck]:
@@ -308,7 +388,17 @@ def evaluate_robustness() -> List[RobustnessCheck]:
     checks: List[RobustnessCheck] = []
     for case in MALFORMED_CASES:
         returncode = run_program(
-            case.functions_definition, case.input_path, SCRATCH_OUTPUT
+            case.functions_definition,
+            case.input_path,
+            case.output_path,
+            ROOT
+            / "tests"
+            / "stdout"
+            / f"malformed_cases_{case.name}_stdout.log",
+            ROOT
+            / "tests"
+            / "stderr"
+            / f"malformed_cases_{case.name}_stderr.log",
         )
         checks.append(
             RobustnessCheck(case.description, returncode, returncode == 0)
@@ -450,6 +540,8 @@ def main() -> int:
 
     scenario_reports: List[ScenarioReport] = []
     for scenario_dir in scenario_dirs:
+        print("\n========================================================")
+        print("========================================================")
         print(f"Running scenario: {scenario_dir.name}...")
         report = evaluate_scenario(scenario_dir)
         if report is not None:
@@ -500,8 +592,10 @@ def main() -> int:
     report_path.write_text("\n".join(lines))
 
     print()
-    print(f"Function name accuracy: {total_name_correct}/{len(all_graded)}"
-          f" ({percentage(total_name_correct, len(all_graded))})")
+    print(
+        f"Function name accuracy: {total_name_correct}/{len(all_graded)}"
+        f" ({percentage(total_name_correct, len(all_graded))})"
+    )
     print(
         f"Parameter extraction accuracy:"
         f" {total_param_correct}/{len(all_param_checks)}"
