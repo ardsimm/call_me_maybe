@@ -88,12 +88,28 @@ type dispatch, and update the final type-coercion switch in `CallMeMaybe.__proce
 - `src/prompting/` — builds the Qwen chat-template-style prompt strings (`__templates.py`) fed to the model for
   name selection and each parameter in turn, threading the previously generated parameter as context.
 
-## Claude-authored reports
+## Claude-authored reports, todos, issues, and metrics
 
 Reports (audits, reviews, etc.) written by Claude go under `claude/reports/`, named
 `report_[number]_[timestamp].md` — `number` is a sequential index starting at 0, `timestamp` is
 `YYYYMMDD-HHMMSS` (local time at creation). Example: `claude/reports/report_0_20260823-193657.md`.
-This directory is tracked in git (not ignored).
+
+Todo lists follow the same convention under `claude/todo/`, named `todo_[number]_[timestamp].md`.
+
+Ad hoc test fixtures (JSON file pairs for manual verification runs, per the subject's "Additional
+Guidelines" — not submitted/graded) live under `claude/test_cases/<scenario_name>/`, each with its
+own `functions_definition.json` and `function_calling_tests.json`; `claude/test_cases/manifest.md`
+lists every scenario with its exact run command.
+
+Draft GitHub issues (write-up + checklist, ready to paste as an issue body) follow the same
+convention under `claude/issues/`, named `issue_[number]_[timestamp].md`, and end with the line
+`*Issue found and written by claude*`.
+
+Accuracy metrics over time live under `claude/metrics/`, named `metrics_[number]_[timestamp].md` —
+one small file per measurement milestone, each linking back to its full report where one exists;
+`claude/metrics/timeline.md` is the at-a-glance rollup across every milestone.
+
+All five directories are tracked in git (not ignored).
 
 ## Working guidelines
 
@@ -101,6 +117,7 @@ This directory is tracked in git (not ignored).
 - When generating code, follow flake8's norm. Run `make lint-strict` (flake8 + mypy) to check compliance before
   considering a change done.
 - Never use emojis — not in code, comments, markdown, or anywhere else.
+- Do not delete `data/output/` files before running a test — the program overwrites them itself.
 
 ## Constraints from the assignment spec (do not violate)
 
