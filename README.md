@@ -241,6 +241,8 @@ submitted or graded, so there is no unit test suite and no test framework (`pyte
 etc.) anywhere in this repo. Verification instead runs the real CLI end to end against hand-written
 JSON fixtures — the same way a user would actually invoke the program.
 
+*The following tests will not be included in the submit for this project but can be recovered from [the gihub repository](https://github.com/ardsimm/call_me_maybe)*
+
 - **`tests/test_cases/`** — one subdirectory per scenario, each a self-contained
   `functions_definition.json` + `function_calling_tests.json` pair meant to be passed straight to
   `src` (`tests/test_cases/manifest.md` lists every scenario with its exact run command):
