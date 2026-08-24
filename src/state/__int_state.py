@@ -5,11 +5,9 @@ from .state import StateStage, State
 
 
 class IntStateStage(StateStage):
-    INITIAL = (0,)
-    PRE_FLOAT_POINT = (1,)
-    FLOAT_POINT = (2,)
-    DATA = (3,)
-    TERMINAL = 4
+    INITIAL = 0
+    DATA = 1
+    TERMINAL = 2
 
 
 class IntState(State):
