@@ -2,7 +2,7 @@ from typing import List, Dict, TypedDict
 from src.models.arguments import Arguments
 from src.models.function import Function, Parameter, ParameterType
 from pydantic import BaseModel, Field
-from src.parsing.parser_exceptions import ParsingError, ParsingValidationError
+from src.parsing.parser_exceptions import ParsingError
 import json
 
 

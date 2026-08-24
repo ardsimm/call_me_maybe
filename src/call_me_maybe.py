@@ -36,16 +36,6 @@ class CallMeMaybe:
         generator = GeneratorFactory.get_instance()
         item: OutputItem = {"prompt": "", "name": "", "parameters": {}}
         item["prompt"] = prompt
-
-        print(
-            "\n=====================================================",
-            "=====================================================",
-            f"Generating for prompt: {prompt}",
-            "=====================================================",
-            "=====================================================",
-            sep="\n",
-        )
-
         name = generator.generate_name(prompt, context.functions)
 
         filtered_functions = [
@@ -87,11 +77,25 @@ class CallMeMaybe:
         items: List[OutputItem] = []
 
         for prompt in context.prompts:
+            print(
+                "\n=====================================================",
+                "=====================================================",
+                prompt,
+                "=====================================================",
+                "=====================================================",
+                sep="\n",
+            )
+            item: OutputItem = {"prompt": prompt, "name": "", "parameters": {}}
+            if "<|im_end|>" in prompt or "<|im_start|>" in prompt:
+                print("Nice try, not computing this one :p")
+                items.append(item)
+                continue
             try:
-                items.append(cls.__process_prompt(prompt, context))
+                item = cls.__process_prompt(prompt, context)
+                items.append(item)
             except GenerationError as err:
                 print(f"Error while generating prompt {prompt}:\n{err}")
-                items.append({"prompt": "", "name": "", "parameters": {}})
+                items.append(item)
                 continue
         return items
 
