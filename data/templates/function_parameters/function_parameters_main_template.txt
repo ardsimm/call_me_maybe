@@ -9,7 +9,62 @@ Rules:
 - Convert indirect descriptions into the concrete representation required by the function.
 - Use the function description to understand the purpose of the current parameter.
 - Match the information in the request to the correct parameter.
+- Respond with only the exact value, immediately, with no explanation or reasoning.
+- If the value itself contains a double quote character, escape it as \" so the value stays one
+  continuous string instead of being cut short.
 
+<|im_end|>
+
+<|im_start|>user
+User request:
+Greet John "The Rock" Doe
+
+Function:
+fn_greet
+
+Description:
+Generate a greeting message for a person by name.
+
+Parameters:
+- name: string
+
+Current parameter:
+name (string)
+<|im_end|>
+
+<|im_start|>assistant
+<think>
+
+</think>
+
+name:"John \"The Rock\" Doe",
+<|im_end|>
+
+<|im_start|>user
+User request:
+Rate the gadget 'SuperWidget' 3 out of 5, review 'Stopped working after a week', not great
+
+Function:
+fn_rate_product
+
+Description:
+Rate a product with a score, an optional written review, and a recommend flag.
+
+Parameters:
+- product_name: string
+- score: number
+- review: string
+
+Current parameter:
+review (string)
+<|im_end|>
+
+<|im_start|>assistant
+<think>
+
+</think>
+
+review:"Stopped working after a week",
 <|im_end|>
 
 <|im_start|>user
@@ -30,3 +85,7 @@ Current parameter:
 <|im_end|>
 
 <|im_start|>assistant
+<think>
+
+</think>
+

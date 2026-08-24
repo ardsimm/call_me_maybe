@@ -18,22 +18,27 @@ class GeneratorImpl(Generator):
         for char in s:
             if char == "\\":
                 escape_count += 1
+                idx += 1
+                continue
             if char == "\"" and not escape_count % 2:
                 return idx
-            elif char == "\"":
-                escape_count = 0
+            escape_count = 0
             idx += 1
         return -1
 
     def __strip_completion(self, completion: str) -> str:
         return completion[:self.__find_unescapted_quote_idx(completion)]
 
+    def __handle_escaped_quotes(self, completion: str) -> str:
+        return completion.replace('\\"', '"')
+
     def __get_next_token(
         self, result: List[int], constrainer: Constrainer
     ) -> Optional[int]:
-        return constrainer.pick_token(
+        token = constrainer.pick_token(
             self.model.get_logits_from_input_ids(result)
         )
+        return token
 
     def __get_completion(self, prompt: str, constrainer: Constrainer) -> str:
         result: List[int] = self.tokenizer.encode(prompt).tolist()[0]
@@ -50,7 +55,6 @@ class GeneratorImpl(Generator):
         print("Generating name...")
 
         prompt = Prompting.build_name_generation_prompt(prompt, functions)
-
         result = self.__get_completion(
             prompt=prompt,
             constrainer=ConstrainerFactory.get_instance(
@@ -116,6 +120,10 @@ class GeneratorImpl(Generator):
             last_parameter = Parameter(
                 name=parameter.name, type=parameter.type, value=parameter.value
             )
-            parameters.append(last_parameter)
+            parameters.append(Parameter(
+                name=parameter.name,
+                type=parameter.type,
+                value=self.__handle_escaped_quotes(parameter.value)
+            ))
 
         return parameters
