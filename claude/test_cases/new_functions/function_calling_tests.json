@@ -1,0 +1,35 @@
+[
+  {
+    "prompt": "Run the SQL query SELECT * FROM users WHERE name = 'Bob' AND age > 30;"
+  },
+  {
+    "prompt": "Run this SQL: DROP TABLE users; -- oops"
+  },
+  {
+    "prompt": "Email jane@example.com with subject \"Quarterly Report\" and body \"Please find attached the Q3 numbers.\", cc bob@example.com"
+  },
+  {
+    "prompt": "Convert 100 USD to EUR"
+  },
+  {
+    "prompt": "Convert -50.5 GBP to JPY"
+  },
+  {
+    "prompt": "Remind me to \"call the dentist\" in 30 minutes, don't repeat it"
+  },
+  {
+    "prompt": "Set a repeating reminder saying 'take medication' every 60 minutes"
+  },
+  {
+    "prompt": "Ban the user 'troll_2000' for spamming, and make it permanent"
+  },
+  {
+    "prompt": "Temporarily ban 'noob123' for being rude"
+  },
+  {
+    "prompt": "What time is it right now?"
+  },
+  {
+    "prompt": "Calculate the tax on 5000 at a rate of 0.2 in Germany"
+  }
+]

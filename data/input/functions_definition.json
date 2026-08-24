@@ -15,6 +15,30 @@
     }
   },
   {
+    "name": "fn_int_len",
+    "description": "Computes the length of a given integer and returns it.",
+    "parameters": {
+      "n": {
+        "type": "int"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  },
+  {
+    "name": "fn_float_len",
+    "description": "Computes the length of a given float and returns it.",
+    "parameters": {
+      "n": {
+        "type": "number"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  },
+  {
     "name": "fn_greet",
     "description": "Generate a greeting message for a person by name.",
     "parameters": {
@@ -61,6 +85,87 @@
         "type": "string"
       },
       "replacement": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "string"
+    }
+  },
+  {
+    "name": "fn_send_message",
+    "description": "Send a text message to a recipient",
+    "parameters": {
+      "message": {
+        "type": "string"
+      },
+      "recipient": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_control_lights",
+    "description": "Control the lights in a given room",
+    "parameters": {
+      "room": {
+        "type": "string"
+      },
+      "powered": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_control_temperature",
+    "description": "Change the temperature in a given room",
+    "parameters": {
+      "room": {
+        "type": "string"
+      },
+      "temperature": {
+        "type": "number"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_call_taxi",
+    "description": "Call a taxi to a given location",
+    "parameters": {
+      "location": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_book_flight",
+    "description": "Book a flight for a passenger to a destination, with seat and luggage info.",
+    "parameters": {
+      "passenger_name": {
+        "type": "string"
+      },
+      "seat_number": {
+        "type": "int"
+      },
+      "price": {
+        "type": "number"
+      },
+      "has_luggage": {
+        "type": "boolean"
+      },
+      "destination": {
         "type": "string"
       }
     },

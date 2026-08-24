@@ -1,0 +1,53 @@
+[
+  {
+    "prompt": "What is the length of -42"
+  },
+  {
+    "prompt": "What is the length of --42"
+  },
+  {
+    "prompt": "What is the length of \"-42-\""
+  },
+  {
+    "prompt": "What is the length of \"-42-4\""
+  },
+  {
+    "prompt": "What is the length of \"42-\""
+  },
+  {
+    "prompt": "What is the length of \"42-4\""
+  },
+  {
+    "prompt": "What is the length of \"-4-2\""
+  },
+  {
+    "prompt": "What is the length of \"-123456789-\""
+  },
+  {
+    "prompt": "What is the length of \"-42--\""
+  },
+  {
+    "prompt": "What is the length of -42.0"
+  },
+  {
+    "prompt": "What is the length of --42.0"
+  },
+  {
+    "prompt": "What is the length of \"-42.0-\""
+  },
+  {
+    "prompt": "What is the length of \"-42.0-4\""
+  },
+  {
+    "prompt": "What is the length of \"42.0-\""
+  },
+  {
+    "prompt": "What is the length of \"42.0-4\""
+  },
+  {
+    "prompt": "What is the length of \"-4.0-2.0\""
+  },
+  {
+    "prompt": "What is the length of \"-123456.789-\""
+  }
+]

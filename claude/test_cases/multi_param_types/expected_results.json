@@ -1,0 +1,95 @@
+[
+  {
+    "name": "fn_book_flight",
+    "parameters": {
+      "passenger_name": "Alice Dupont",
+      "seat_number": 42,
+      "price": 350.5,
+      "has_luggage": true,
+      "destination": "Tokyo"
+    }
+  },
+  {
+    "name": "fn_book_flight",
+    "parameters": {
+      "passenger_name": "Bob Martin",
+      "seat_number": 7,
+      "price": 120.0,
+      "has_luggage": false,
+      "destination": "Berlin"
+    }
+  },
+  {
+    "name": "fn_schedule_meeting",
+    "parameters": {
+      "title": "Sprint Planning",
+      "attendees": 8,
+      "start_hour": 14.5,
+      "is_recurring": true
+    }
+  },
+  {
+    "name": "fn_schedule_meeting",
+    "parameters": {
+      "title": "Kickoff",
+      "attendees": 3,
+      "start_hour": 9.0,
+      "is_recurring": false
+    }
+  },
+  {
+    "name": "fn_create_invoice",
+    "parameters": {
+      "client_name": "Wayne Enterprises",
+      "amount": 4999.99,
+      "due_in_days": 30,
+      "is_paid": false
+    }
+  },
+  {
+    "name": "fn_register_user",
+    "parameters": {
+      "username": "jdoe42",
+      "email": "jdoe42@example.com",
+      "age": 29,
+      "subscribe_newsletter": true
+    }
+  },
+  {
+    "name": "fn_register_user",
+    "parameters": {
+      "username": "guest01",
+      "email": "guest01@example.com",
+      "age": 17,
+      "subscribe_newsletter": false
+    }
+  },
+  {
+    "name": "fn_rate_product",
+    "parameters": {
+      "product_name": "Wireless Mouse",
+      "score": 4.5,
+      "review": "Works great and battery lasts long",
+      "would_recommend": true
+    }
+  },
+  {
+    "name": "fn_rate_product",
+    "parameters": {
+      "product_name": "Cheap Charger",
+      "score": 1.0,
+      "review": "Broke after two days",
+      "would_recommend": false
+    }
+  },
+  {
+    "name": "fn_place_order",
+    "parameters": {
+      "item_name": "USB-C Cable",
+      "quantity": 3,
+      "unit_price": 9.99,
+      "express_shipping": true,
+      "shipping_address": "12 Main Street, Springfield"
+    }
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "fn_reverse_string",
+    "description": "Reverse a string and return the reversed result.",
+    "parameters": {
+      "s": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "string"
+    }
+  },
+  {
+    "name": "fn_call_taxi",
+    "description": "Call a taxi to a given location",
+    "parameters": {
+      "location": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  }
+]

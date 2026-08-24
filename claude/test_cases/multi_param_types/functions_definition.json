@@ -1,0 +1,134 @@
+[
+  {
+    "name": "fn_book_flight",
+    "description": "Book a flight for a passenger to a destination, with seat and luggage info.",
+    "parameters": {
+      "passenger_name": {
+        "type": "string"
+      },
+      "seat_number": {
+        "type": "int"
+      },
+      "price": {
+        "type": "number"
+      },
+      "has_luggage": {
+        "type": "boolean"
+      },
+      "destination": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "string"
+    }
+  },
+  {
+    "name": "fn_schedule_meeting",
+    "description": "Schedule a meeting with a title, attendee count, start hour and recurrence flag.",
+    "parameters": {
+      "title": {
+        "type": "string"
+      },
+      "attendees": {
+        "type": "int"
+      },
+      "start_hour": {
+        "type": "number"
+      },
+      "is_recurring": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "boolean"
+    }
+  },
+  {
+    "name": "fn_create_invoice",
+    "description": "Create an invoice for a client with amount, due day count, and a paid flag.",
+    "parameters": {
+      "client_name": {
+        "type": "string"
+      },
+      "amount": {
+        "type": "number"
+      },
+      "due_in_days": {
+        "type": "int"
+      },
+      "is_paid": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_register_user",
+    "description": "Register a new user account with username, age, email and newsletter opt-in.",
+    "parameters": {
+      "username": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string"
+      },
+      "age": {
+        "type": "int"
+      },
+      "subscribe_newsletter": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "boolean"
+    }
+  },
+  {
+    "name": "fn_rate_product",
+    "description": "Rate a product with a score, an optional written review, and a recommend flag.",
+    "parameters": {
+      "product_name": {
+        "type": "string"
+      },
+      "score": {
+        "type": "number"
+      },
+      "review": {
+        "type": "string"
+      },
+      "would_recommend": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_place_order",
+    "description": "Place an order for a quantity of an item at a given unit price, with express shipping option.",
+    "parameters": {
+      "item_name": {
+        "type": "string"
+      },
+      "quantity": {
+        "type": "int"
+      },
+      "unit_price": {
+        "type": "number"
+      },
+      "express_shipping": {
+        "type": "boolean"
+      },
+      "shipping_address": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "string"
+    }
+  }
+]

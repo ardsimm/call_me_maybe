@@ -1,0 +1,9 @@
+[
+  {
+    "name": "fn_extra_key",
+    "description": "Has an extra, unexpected top-level key.",
+    "parameters": {},
+    "returns": { "type": "boolean" },
+    "version": "1.0"
+  }
+]

@@ -1,0 +1,10 @@
+<|im_start|>system
+You have access to the following functions:
+{[FUNCTION_OPTIONS]}
+Pick the appopriate function for the following user prompt.
+<|im_end|>
+<|im_start|>user
+{[USER_PROMPT]}
+<|im_end|>
+<|im_start|>assistant
+{"function": { "name": "

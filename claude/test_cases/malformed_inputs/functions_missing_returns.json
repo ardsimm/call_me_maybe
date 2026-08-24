@@ -1,0 +1,7 @@
+[
+  {
+    "name": "fn_no_returns",
+    "description": "Missing the mandatory 'returns' field.",
+    "parameters": {}
+  }
+]

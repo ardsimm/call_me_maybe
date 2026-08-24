@@ -1,0 +1,32 @@
+[
+  {
+    "prompt": "Greet the artist known as \"Old \\\"Blue Eyes\\\" Sinatra\""
+  },
+  {
+    "prompt": "Store the note 'This is a very long note that keeps going and going and going in order to approach the token generation limit of the underlying constrained decoder, repeating filler text over and over and over again until it becomes quite long indeed, testing whether long values still get captured in full without being cut off prematurely by any safety cap or token budget the system might impose on a single generated value, which would be a real limitation worth documenting if it happens here today during this test run right now.'"
+  },
+  {
+    "prompt": "Reverse the string '@#$%^&*()_+-=[]{}|;:,.<>?'"
+  },
+  {
+    "prompt": "What is the sum of 6.022e23 and 1"
+  },
+  {
+    "prompt": "GREET SHREK RIGHT NOW"
+  },
+  {
+    "prompt": "Please darken the kitchen, no lights at all"
+  },
+  {
+    "prompt": "What is the sum of -99999999999999999999999999999999999999999999999999 and 1"
+  },
+  {
+    "prompt": "Hi"
+  },
+  {
+    "prompt": "Reverse the string '     '"
+  },
+  {
+    "prompt": "Store the note 'Meeting at café — bring the résumé!'"
+  }
+]

@@ -1,0 +1,41 @@
+[
+  {
+    "prompt": "What is the sum of -17 and -25?"
+  },
+  {
+    "prompt": "What is the sum of 0 and 0?"
+  },
+  {
+    "prompt": "What is the sum of 3.14159265358979 and 2.71828182845904?"
+  },
+  {
+    "prompt": "What is the sum of 999999999999999999999999999999999999999999 and 1?"
+  },
+  {
+    "prompt": "Multiply -8 by 0.001"
+  },
+  {
+    "prompt": "What is the square root of 0?"
+  },
+  {
+    "prompt": "Greet the empty string \"\""
+  },
+  {
+    "prompt": "Reverse the string ''"
+  },
+  {
+    "prompt": "Reverse the string ' '"
+  },
+  {
+    "prompt": "Store the note 'Call me \"Bob\" @ 5 o'clock, 100% sure!'"
+  },
+  {
+    "prompt": "Store the note '日本語のテスト with emojis 🚀🔥'"
+  },
+  {
+    "prompt": "Store the note 'line one\\nline two\\ttabbed'"
+  },
+  {
+    "prompt": "Greet Jean-François O'Malley-Smédry"
+  }
+]

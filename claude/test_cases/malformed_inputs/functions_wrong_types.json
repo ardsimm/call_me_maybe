@@ -1,0 +1,8 @@
+[
+  {
+    "name": "fn_wrong_types",
+    "description": 12345,
+    "parameters": [],
+    "returns": { "type": "boolean" }
+  }
+]
