@@ -116,6 +116,9 @@ class CallMeMaybe:
         except (ParsingValidationError, ParsingError) as e:
             print(f"Parsing failed: {e}")
             return
+        if not len(context.prompts):
+            print("The prompts file was valid json but was empty, exiting.")
+            return
         items: List[OutputItem] = cls.__process_prompts(context)
         try:
             cls.__write_output(items, arguments)
