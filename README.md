@@ -60,18 +60,32 @@ Reads `data/input/functions_definition.json` and `data/input/function_calling_te
 writes the results to `data/output/function_calls.json`. The first run downloads and caches
 `Qwen/Qwen3-0.6B` from the Hugging Face Hub.
 
-To use custom paths or a different model, run the module directly instead:
+To use custom paths, run the module directly instead:
 
 ```sh
 uv run python -m src \
   --functions_definition <path/to/functions_definition.json> \
   --input <path/to/prompts.json> \
-  --output <path/to/output.json> \
-  --model <hf-model-id>
+  --output <path/to/output.json>
 ```
 
-All four flags are optional and independently overridable; any omitted one falls back to its
-default. `--output` accepts any path and creates missing parent directories as needed.
+All three flags are optional and independently overridable; any omitted one falls back to its
+default. `--output` accepts any path and creates missing parent directories as needed. The model
+(`Qwen/Qwen3-0.6B`) is fixed and not CLI-overridable, per the subject's requirement.
+
+### Build
+
+```sh
+make build       # wraps src into an executable ./call_me_maybe
+make build-test  # wraps tests into an executable ./run_tests
+```
+
+Each rule writes a small `chmod +x` shell script (`#!/usr/bin/env bash`, `cd`s to its own location,
+then `exec uv run python -m <src|tests> "$@"`) so the tool/test suite can be invoked directly as a
+standalone command, e.g. `./call_me_maybe --input <path>` or `./run_tests`, without prefixing
+`uv run python -m` every time. `uv` still manages the venv/dependencies underneath — these are thin
+wrappers, not standalone binaries. Neither script is committed; both are generated build artifacts
+(git-ignored) and removed by `make clean`/`fclean`.
 
 ### Debug
 
@@ -88,10 +102,18 @@ make lint         # flake8 + the subject-mandated mypy flags
 make lint-strict   # flake8 + mypy --strict
 ```
 
+### Rebuild / reinstall
+
+```sh
+make re        # remove and regenerate ./call_me_maybe
+make re-test   # remove and regenerate ./run_tests
+make re-deps   # fclean + install: full dependency reinstall
+```
+
 ### Clean
 
 ```sh
-make clean    # remove __pycache__ / .mypy_cache
+make clean    # remove __pycache__ / .mypy_cache / test output logs / the two build wrappers
 make fclean   # also remove the .venv
 ```
 
@@ -293,14 +315,22 @@ one entry per prompt, e.g.:
 ]
 ```
 
-To run against custom functions/prompts, or a different model:
+To run against custom functions/prompts:
 
 ```sh
 uv run python -m src \
   --functions_definition tests/test_cases/multi_param_types/functions_definition.json \
   --input tests/test_cases/multi_param_types/function_calling_tests.json \
-  --output data/output/multi_param_types.json \
-  --model Qwen/Qwen3-0.6B
+  --output data/output/multi_param_types.json
+```
+
+Or, after `make build`, the same thing via the standalone wrapper:
+
+```sh
+./call_me_maybe \
+  --functions_definition tests/test_cases/multi_param_types/functions_definition.json \
+  --input tests/test_cases/multi_param_types/function_calling_tests.json \
+  --output data/output/multi_param_types.json
 ```
 
 Given the prompt `"Book a flight to Tokyo for Alice Dupont, seat 42, price 350.5, with luggage"`,
@@ -326,3 +356,5 @@ a fresh report to `tests/test-reports/`:
 ```sh
 make test
 ```
+
+Or, after `make build-test`, via the standalone wrapper: `./run_tests`.
