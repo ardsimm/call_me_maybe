@@ -196,36 +196,30 @@ Each of the moving parts above maps to one layer of the codebase:
 
 ## Performance analysis
 
-All numbers below come from `claude/reports/report_1_20260823-200910.md` (a set of designed test
+All numbers below come from `claude/reports/report_6_20260824-153702` (a set of designed test
 scenarios covering multi-parameter functions, edge-case values, and ambiguous/adversarial prompts —
 see `claude/test_cases/`) plus a fresh run of the default `data/input/` files to confirm nothing
 regressed since. Both were run on a desktop machine with an NVIDIA RTX 40-series GPU.
 
-- **Function name accuracy: 96%** (24/25 prompts with an objectively correct answer). The one miss
+- **Function name accuracy: 98%** (44/45 prompts with an objectively correct answer). The one miss
   was a prompt-injection attempt succeeding — see below, a robustness issue rather than an
   extraction one.
-- **Parameter accuracy: 92%** (58/63 parameters, given the correct function was picked). Every miss
+- **Parameter accuracy: 98%** (100/102 parameters, given the correct function was picked). Every miss
   traced back to one of two root causes, both fixed since that report: `IntState`/`FloatState`
   originally had no way to emit a `-`, so every negative number came out positive; that's now
   resolved (re-verified against the default `data/input/` prompts, including the adversarial
   `"-42-4"`/`"-42-"` boundary cases, all now round-trip correctly).
 - **100% valid JSON, always.** Structural validity is guaranteed by construction, not by luck — a
   forbidden token can never be selected in the first place.
-- **Speed**: the full default `data/input/function_calling_tests.json` (33 prompts) completes in
+- **Speed**: the full default `data/input/function_calling_tests.json` (20 prompts) completes in
   about 14 seconds end to end (model load included), and every scenario in `report_1` finished its
   batch in under 11 seconds — comfortably inside the "under 5 minutes" requirement.
 
 Known remaining limitations:
 
-- A source string containing a literal `"` can't survive unchanged — `StringState` treats any
-  unescaped `"` as end-of-value, so the model substitutes or drops it to keep generating (observed
-  as a `"` → `'` swap in testing).
 - When a prompt doesn't actually specify a required argument (e.g. "make it really cold", no
   number given), the model still has to produce *something* for that parameter — there's no
   "unknown" value in the schema, so it fabricates a plausible-looking one.
-- Prompt injection via fake chat-template tokens embedded in ordinary user text can hijack both the
-  function choice and its parameters; constrained decoding guarantees the output's *shape*, not
-  that the underlying model can't be steered by adversarial input.
 
 ## Challenges faced
 
@@ -237,24 +231,12 @@ Known remaining limitations:
   symptoms of the same underlying gap. Full write-ups, repro steps, and fixes are tracked under
   `claude/issues/`:
   - A merged vocab token can smuggle a stray character (e.g. a trailing `-`) past `IntState`'s
-    digit check, producing an otherwise-invalid numeral (`claude/issues/issue_2_20260824-123805.md`).
+    digit check, producing an otherwise-invalid numeral
   - `IntState` (and originally `FloatState`) had no mechanism forcing a digit after a leading `-`,
     so the model could in principle repeat `-` forever with no digit ever required
-    (`claude/issues/issue_4_20260824-165933.md`).
   - Numeric parameters could overflow to `Infinity`/`-Infinity` (not valid JSON) via scientific
     notation runaway digit generation, and the `<|im_end|>`/`<|im_start|>` prompt-injection guard
-    was initially bypassable (`claude/issues/issue_3_20260824-130008.md`).
-  - Several exception-handling gaps let a single malformed prompt or parameter silently drop or
-    crash an entire batch instead of failing just that one item -- found while writing docstrings'
-    `Raises` sections, which forced tracing every call path's exceptions end to end
-    (`claude/issues/issue_0_20260823-213125.md`).
-  - Dead code left over from an abandoned pattern (unused enum members, an unreachable setter)
-    was found by grepping for actual call sites rather than trusting the source alone
-    (`claude/issues/fixed_issue_1_20260823-213741.md`).
-  - Separately, a circular import surfaced when `Arguments.validate_model` imported
-    `ParsingError` at module level: importing any submodule of a package always runs that
-    package's `__init__.py` first, which pulled in `Parser`, which needed `Arguments` back before
-    it had finished being defined. Fixed by making the import local to `validate_model`.
+    was initially bypassable.
 
 ## Testing strategy
 
