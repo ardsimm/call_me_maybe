@@ -1,5 +1,8 @@
 /tests/test-reports
 /data/output
+/tests/output
+/tests/stdout
+/tests/stderr
 .out
 /private
 
