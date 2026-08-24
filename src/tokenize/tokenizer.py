@@ -15,10 +15,6 @@ class Tokenizer(ABC):
     def model(self) -> Model:
         return self.__model
 
-    @model.setter
-    def model(self, model: Model) -> None:
-        self.__model = model
-
     @abstractmethod
     def encode(self, data: str) -> Tensor:
         pass
