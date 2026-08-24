@@ -23,9 +23,14 @@ class Context(BaseModel):
     def __init__(self, arguments: Arguments):
         super().__init__(prompts=[], functions=[])
         self.functions = []
-        with open(arguments.functions_definition) as functions_definition:
-            functions_dicts: List[FunctionDict] = json.loads(
-                functions_definition.read()
+        try:
+            with open(arguments.functions_definition) as functions_definition:
+                functions_dicts: List[FunctionDict] = json.loads(
+                    functions_definition.read()
+                )
+        except (OSError, json.JSONDecodeError) as err:
+            raise ParsingError(
+                f"Error while parsing functions definition:\n{err}"
             )
         for function_dict in functions_dicts:
             name = function_dict.get("name")
@@ -65,6 +70,8 @@ class Context(BaseModel):
                         for key, value in parameters.items()
                     ],
                 )
+            except TypeError as err:
+                raise ParsingError(f"Invalid parameter data: {err}")
             except ValueError as err:
                 raise ParsingError(f"Invalid parameter type: {err}")
             self.functions.append(function)

@@ -1,4 +1,4 @@
-class AdapterException(Exception):
+class AdapterException(ValueError):
     pass
 
 
