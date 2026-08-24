@@ -80,3 +80,7 @@ class Context(BaseModel):
                 if (len(prompt_dict.items()) != 1):
                     raise ParsingError("Too many entries in prompt")
                 self.prompts.append(prompt)
+        if len(self.prompts) and not len(self.functions):
+            raise ParsingError(
+                "Cannot compute prompts with an empty functions file"
+            )
