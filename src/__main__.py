@@ -13,3 +13,4 @@ if __name__ == "__main__":
     except Exception as e:
         print("An unhandled error occured:\n", file=sys.stderr)
         print_exception(e)
+        sys.exit(1)

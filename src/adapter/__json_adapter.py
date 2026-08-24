@@ -12,7 +12,7 @@ class JSONAdapter(Adapter):
         dump: str
         try:
             dump = json.dumps(value)
-        except json.JSONDecodeError as e:
+        except TypeError as e:
             raise SerializationException(e)
         return dump
 

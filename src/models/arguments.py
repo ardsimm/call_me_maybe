@@ -4,9 +4,9 @@ from pydantic import (
     Field,
     model_validator,
 )
-import json
 from src.adapter.adapter_factory import AdapterFactory
 from src.adapter.adapter_type import AdapterType
+from src.adapter.adapter_exceptions import DeserializationException
 
 
 class Arguments(BaseModel):
@@ -25,6 +25,8 @@ class Arguments(BaseModel):
 
     @model_validator(mode="after")
     def validate_model(self) -> "Arguments":
+        from src.parsing.parser_exceptions import ParsingError
+
         json_adapter = AdapterFactory.get_instance(AdapterType.JSON)
 
         with (
@@ -33,14 +35,14 @@ class Arguments(BaseModel):
         ):
             try:
                 json_adapter.parse(functions_definitions.read())
-            except json.JSONDecodeError as e:
-                raise ValueError(
+            except DeserializationException as e:
+                raise ParsingError(
                     f"Invalid json format for file {self.input}: {e}"
                 )
             try:
                 json_adapter.parse(input_file.read())
-            except json.JSONDecodeError as e:
-                raise ValueError(
+            except DeserializationException as e:
+                raise ParsingError(
                     f"Invalid json format for file {self.input}: {e}"
                 )
         return self

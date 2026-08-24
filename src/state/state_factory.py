@@ -19,8 +19,6 @@ class StateFactory:
             return IntState()
         if type == StateType.FLOAT_STATE:
             return FloatState()
-        if type == StateType.TRIE_STATE:
-            return TrieState()
         raise ValueError(f"Invalid state type {type}")
 
     @staticmethod
