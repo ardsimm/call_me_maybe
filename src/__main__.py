@@ -1,6 +1,10 @@
-from src.call_me_maybe import CallMeMaybe
 import sys
 from traceback import print_exception
+try:
+    from src.call_me_maybe import CallMeMaybe
+except KeyboardInterrupt:
+    print("Interrupted by user")
+    sys.exit(0)
 
 
 def main() -> None:
@@ -24,3 +28,6 @@ if __name__ == "__main__":
         print("An unhandled error occured:\n", file=sys.stderr)
         print_exception(e)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("Interrupted by user")
+        sys.exit(0)
