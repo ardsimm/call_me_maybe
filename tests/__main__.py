@@ -345,7 +345,6 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
     param_correct = sum(1 for p in param_checks if p.correct)
     graded_len = len(graded)
 
-    print("========================================================")
     print(f"Ran {graded_len} prompt" + ("s" if graded_len > 1 else ""))
     print(f"Ignored {skipped_count} prompts")
     print(
@@ -543,6 +542,7 @@ def main() -> int:
         print("\n========================================================")
         print("========================================================")
         print(f"Running scenario: {scenario_dir.name}...")
+        print("========================================================")
         report = evaluate_scenario(scenario_dir)
         if report is not None:
             scenario_reports.append(report)
