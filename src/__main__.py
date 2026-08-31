@@ -5,7 +5,7 @@ try:
 except KeyboardInterrupt:
     print("Interrupted by user")
     sys.exit(0)
-
+import cProfile
 
 def main() -> None:
     """Run the program.
@@ -18,7 +18,8 @@ def main() -> None:
         below only prints a traceback to stderr -- it never calls
         `sys.exit(1)`, so the process still exits 0 even after a crash.
     """
-    CallMeMaybe.run()
+    cProfile.run("CallMeMaybe.run()")
+    # CallMeMaybe.run()
 
 
 if __name__ == "__main__":

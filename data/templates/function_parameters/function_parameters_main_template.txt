@@ -48,6 +48,33 @@ a:"8.43e+32",
 
 <|im_start|>user
 User request:
+Rate the gadget 'SuperWidget' 3 out of 5, review 'Stopped working after a week', not great
+
+Function:
+fn_rate_product
+
+Description:
+Rate a product with a score, an optional written review, and a recommend flag.
+
+Parameters:
+- product_name: string
+- score: number
+- review: string
+
+Current parameter:
+review (string)
+<|im_end|>
+
+<|im_start|>assistant
+<think>
+
+</think>
+
+review:"Stopped working after a week",
+<|im_end|>
+
+<|im_start|>user
+User request:
 Greet John "The Rock" Doe
 
 Function:
