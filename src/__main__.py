@@ -18,8 +18,8 @@ def main() -> None:
         below only prints a traceback to stderr -- it never calls
         `sys.exit(1)`, so the process still exits 0 even after a crash.
     """
-    cProfile.run("CallMeMaybe.run()")
-    # CallMeMaybe.run()
+    # cProfile.run("CallMeMaybe.run()")
+    CallMeMaybe.run()
 
 
 if __name__ == "__main__":

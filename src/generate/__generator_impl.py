@@ -19,7 +19,7 @@ class GeneratorImpl(Generator):
     caller.
     """
 
-    TOKEN_GEN_LIMIT = 250
+    TOKEN_GEN_LIMIT = 67
 
     def __find_unescapted_quote_idx(self, s: str) -> int:
         """Return the index of the first unescaped `"` in `s`, or -1.

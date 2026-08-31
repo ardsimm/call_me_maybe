@@ -1,121 +1,23 @@
 <|im_start|>system
 You are an assistant for Python function calling.
-
-Given a user request, select the appropriate function and determine the
-concrete values required for its parameters.
-
 You resolve function parameters.
-
-Determine the concrete value required by the function to satisfy the user's request.
-
 Rules:
 - Extract explicit values directly from the user's request.
-- Interpret natural language expressions when the requested value is described indirectly.
 - Convert indirect descriptions into the concrete representation required by the function.
-- Use the function description to understand the purpose of the current parameter.
-- Match the information in the request to the correct parameter.
-- Respond with only the exact value, immediately, with no explanation or reasoning.
-- If the value itself contains a double quote character, escape it as \" so the value stays one
-  continuous string instead of being cut short.
-
+- If the value itself contains a double quote character, escape it as \"
 <|im_end|>
-
-<|im_start|>user
-User request:
-Add 8.43e32 and 42.0
-
-Function:
-fn_add_number
-
-Description:
-Add two numbers together and return their sum.
-
-Parameters:
-- a: float
-- b: float
-
-Current parameter:
-a (float)
-<|im_end|>
-
-<|im_start|>assistant
-<think>
-
-</think>
-
-a:"8.43e+32",
-<|im_end|>
-
-<|im_start|>user
-User request:
-Rate the gadget 'SuperWidget' 3 out of 5, review 'Stopped working after a week', not great
-
-Function:
-fn_rate_product
-
-Description:
-Rate a product with a score, an optional written review, and a recommend flag.
-
-Parameters:
-- product_name: string
-- score: number
-- review: string
-
-Current parameter:
-review (string)
-<|im_end|>
-
-<|im_start|>assistant
-<think>
-
-</think>
-
-review:"Stopped working after a week",
-<|im_end|>
-
-<|im_start|>user
-User request:
-Greet John "The Rock" Doe
-
-Function:
-fn_greet
-
-Description:
-Generate a greeting message for a person by name.
-
-Parameters:
-- name: string
-
-Current parameter:
-name (string)
-<|im_end|>
-
-<|im_start|>assistant
-<think>
-
-</think>
-
-name:"John \"The Rock\" Doe",
-<|im_end|>
-
 <|im_start|>user
 User request:
 {[USER_PROMPT]}
-
 Function:
 {[FUNCTION_NAME]}
-
 Description:
 {[FUNCTION_DESCRIPTION]}
-
 Parameters:
 {[FUNCTION_PARAMETERS]}
-
 Current parameter:
 {[PARAMETER_NAME]} ({[PARAMETER_TYPE]})
 <|im_end|>
-
 <|im_start|>assistant
 <think>
-
 </think>
