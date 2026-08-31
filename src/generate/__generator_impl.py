@@ -3,7 +3,9 @@ from src.constrainer.constrainer_factory import ConstrainerFactory
 from src.prompting.prompting import Prompting
 from src.state import StateFactory, StateType, State
 from src.models.function import Parameter, ParameterType, Function
-from typing import List, Optional
+from typing import List, Optional, cast
+
+from src.state.__trie_state import TrieState
 from .generator import Generator
 
 
@@ -110,6 +112,9 @@ class GeneratorImpl(Generator):
             Forwarded from `Constrainer.pick_token` if the picked token
             is rejected by its state.
         """
+        allowed_tokens = constrainer.state.get_allowed_tokens()
+        if allowed_tokens is None:
+            return None
         token = constrainer.pick_token(
             self.model.get_logits_from_input_ids(result)
         )
@@ -147,6 +152,14 @@ class GeneratorImpl(Generator):
         token_count = 0
         while token is not None and token_count < self.TOKEN_GEN_LIMIT:
             result.append(token)
+            if isinstance(constrainer.state, TrieState):
+                trie_state: TrieState = cast(TrieState, constrainer.state)
+                determinated_branch = trie_state.trie.get_determinated_branch(
+                    trie_state.current_node
+                )
+                if determinated_branch is not None:
+                    result.extend(determinated_branch)
+                    break
             token = self.__get_next_token(result, constrainer)
             token_count += 1
         return self.tokenizer.decode(result[initial_len:])
