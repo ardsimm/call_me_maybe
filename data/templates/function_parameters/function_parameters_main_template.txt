@@ -1,4 +1,9 @@
 <|im_start|>system
+You are an assistant for Python function calling.
+
+Given a user request, select the appropriate function and determine the
+concrete values required for its parameters.
+
 You resolve function parameters.
 
 Determine the concrete value required by the function to satisfy the user's request.
@@ -43,33 +48,6 @@ a:"8.43e+32",
 
 <|im_start|>user
 User request:
-Rate the gadget 'SuperWidget' 3 out of 5, review 'Stopped working after a week', not great
-
-Function:
-fn_rate_product
-
-Description:
-Rate a product with a score, an optional written review, and a recommend flag.
-
-Parameters:
-- product_name: string
-- score: number
-- review: string
-
-Current parameter:
-review (string)
-<|im_end|>
-
-<|im_start|>assistant
-<think>
-
-</think>
-
-review:"Stopped working after a week",
-<|im_end|>
-
-<|im_start|>user
-User request:
 Greet John "The Rock" Doe
 
 Function:
@@ -95,33 +73,6 @@ name:"John \"The Rock\" Doe",
 
 <|im_start|>user
 User request:
-Rate the gadget 'SuperWidget' 3 out of 5, review 'Stopped working after a week', not great
-
-Function:
-fn_rate_product
-
-Description:
-Rate a product with a score, an optional written review, and a recommend flag.
-
-Parameters:
-- product_name: string
-- score: number
-- review: string
-
-Current parameter:
-review (string)
-<|im_end|>
-
-<|im_start|>assistant
-<think>
-
-</think>
-
-review:"Stopped working after a week",
-<|im_end|>
-
-<|im_start|>user
-User request:
 {[USER_PROMPT]}
 
 Function:
@@ -141,4 +92,3 @@ Current parameter:
 <think>
 
 </think>
-
