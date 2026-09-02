@@ -1,4 +1,3 @@
-from sre_parse import Tokenizer
 from typing import Dict, List, Optional, cast
 from src.model.model import Model
 from src.tokenize.tokenizer_factory import TokenizerFactory
@@ -67,7 +66,7 @@ class Trie:
         node: TrieNode
     ) -> Optional[List[int]]:
         tokens: List[int] = []
-        curr_node = node
+        curr_node: Optional[TrieNode] = node
         while (
             curr_node is not None
             and curr_node.get(END_OF_BRANCH) is None

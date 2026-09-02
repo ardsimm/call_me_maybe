@@ -54,13 +54,13 @@ flake8: install
 
 mypy: install
 	echo Running Mypy
-	uv run python -m mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV);
+	uv run python -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV) --exclude tests
 
 lint: install flake8 mypy
 
 mypy-strict: install
 	echo Running Mypy
-	uv run python -m mypy . --strict --exclude $(VENV)
+	uv run python -m mypy . --strict --exclude $(VENV) --exclude tests
 
 lint-strict: flake8 mypy-strict
 
