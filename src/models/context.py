@@ -83,7 +83,11 @@ class Context(BaseModel):
             raise ParsingError(
                 f"Error while parsing functions definition:\n{err}"
             )
+        if not isinstance(functions_dicts, list):
+            raise ParsingError("Functions must be a list")
         for function_dict in functions_dicts:
+            if not isinstance(function_dict, dict):
+                raise ParsingError("Functions must be a list of dicts")
             name = function_dict.get("name")
             description = function_dict.get("description")
             parameters = function_dict.get("parameters")
@@ -133,17 +137,22 @@ class Context(BaseModel):
             except ValueError as err:
                 raise ParsingError(f"Invalid parameter type: {err}")
             self.functions.append(function)
-        with open(arguments.input) as prompts:
-            prompts_dicts = json.loads(prompts.read())
-            for prompt_dict in prompts_dicts:
-                prompt = prompt_dict.get("prompt")
-                if prompt is None or not isinstance(prompt, str):
-                    raise ParsingError(
-                        "Missing or invalid value in prompts file"
-                    )
-                if len(prompt_dict.items()) != 1:
-                    raise ParsingError("Too many entries in prompt")
-                self.prompts.append(prompt)
+        try:
+            with open(arguments.input) as prompts:
+                prompts_dicts = json.loads(prompts.read())
+                for prompt_dict in prompts_dicts:
+                    prompt = prompt_dict.get("prompt")
+                    if prompt is None or not isinstance(prompt, str):
+                        raise ParsingError(
+                            "Missing or invalid value in prompts file"
+                        )
+                    if len(prompt_dict.items()) != 1:
+                        raise ParsingError("Too many entries in prompt")
+                    self.prompts.append(prompt)
+        except (OSError, json.JSONDecodeError) as err:
+            raise ParsingError(
+                f"Error while input:\n{err}"
+            )
         if len(self.prompts) and not len(self.functions):
             raise ParsingError(
                 "Cannot compute prompts with an empty functions file"
