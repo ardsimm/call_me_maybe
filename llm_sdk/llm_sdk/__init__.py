@@ -12,7 +12,7 @@ from transformers import (
 )
 
 # keep the console clean
-logging.set_verbosity_error()  # type: ignore
+logging.set_verbosity_error()
 
 
 class Small_LLM_Model:
@@ -73,7 +73,7 @@ class Small_LLM_Model:
             trust_remote_code=trust_remote_code,
         )
         self._model.to(self._device)  # type: ignore
-        self._model.eval()  # type: ignore
+        self._model.eval()
 
         # switch to inference-only mode
         for p in self._model.parameters():
