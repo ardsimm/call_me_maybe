@@ -17,6 +17,14 @@ prompt/parameter counts happens below.
 | 3 | Revised `Infinity` fix (per-parameter fallback) (`metrics_3`) | 45 prompts / 102 params | 44/45 = 98% | 99/102 = 97% |
 | 4 | Scientific notation support in `FloatState` (`metrics_4`) | 45 prompts / 102 params | 44/45 = 98% | 100/102 = 98% |
 | 5 | Trailing/embedded minus-sign robustness (`metrics_5`) | 45 prompts / 102 params | 44/45 = 98% | 100/102 = 98% (unchanged) |
+| 6 | **Speed milestone** - first four performance fixes (`metrics_6`) | 20-prompt hard set, timing only | not re-scored | not re-scored |
+
+Row 6 is a **speed** milestone and deliberately carries no accuracy figures: the 45-prompt scored
+suite was not re-run, so rows 0-5 remain the last measured accuracy. Its numbers are wall clock
+(15 min -> 9:51 for 20 prompts), seconds per forward pass (1.986 -> 1.795), and wasted forward
+passes (15.3% -> 0). One unscored defect was visible in its output -- a `recipient` value copied
+verbatim out of a few-shot example -- which is why the next round of prompt trimming must restore
+accuracy scoring rather than continue on timing alone.
 
 ## Reading the trend
 

@@ -1,4 +1,9 @@
 <|im_start|>system
+You are an assistant for Python function calling.
+
+Given a user request, select the appropriate function and determine the
+concrete values required for its parameters.
+
 You have access to the following functions:
 {[FUNCTION_OPTIONS]}
 Pick the appopriate function for the following user prompt.

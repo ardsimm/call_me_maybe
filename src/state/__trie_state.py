@@ -79,3 +79,11 @@ class TrieState(State):
                 self._tokenizer.decode([token])
             })")
         self.__current_node = next_node
+
+    @property
+    def trie(self) -> Trie:
+        return self.__trie
+
+    @property
+    def current_node(self) -> TrieNode:
+        return self.__current_node

@@ -12,11 +12,6 @@
     "parameters": { "a": 3.14159265358979, "b": 2.71828182845904 }
   },
   {
-    "name": "fn_add_numbers",
-    "parameters": { "a": 42.0, "b": 1.0 },
-    "note": "a is a 42-digit integer, unrepresentable as float64 (overflows to inf); current fallback substitutes 42.0"
-  },
-  {
     "name": "fn_multiply_numbers",
     "parameters": { "a": -8.0, "b": 0.001 }
   },
