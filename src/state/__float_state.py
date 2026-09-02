@@ -66,7 +66,9 @@ class FloatState(State):
         self.dot_token = self._tokenizer.encode(".").tolist()[0]
         self.lower_e_token = self._tokenizer.encode("e").tolist()[0]
         self.upper_e_token = self._tokenizer.encode("E").tolist()[0]
-        self.string_end_sequences = Model.get_instance().string_end_sequences
+        self.string_end_sequences = list(
+            Model.get_instance().string_end_sequences
+        )
         self.digits_tokens: List[int] = reduce(
             lambda ac, el: ac + el,
             [

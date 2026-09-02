@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Dict, List, Optional
+from typing import Dict, Optional, Set
 from llm_sdk import Small_LLM_Model
 from src.adapter.adapter_exceptions import DeserializationException
 from src.generate.generator_exceptions import GenerationError
@@ -15,7 +15,7 @@ class Model(Small_LLM_Model):
     """
 
     __instance: Optional["Model"] = None
-    __string_end_sequences: Optional[List[int]] = None
+    __string_end_sequences: Optional[Set[int]] = None
 
     def __load_string_end_sequences(self) -> None:
         """Compute and cache `string_end_sequences` from the vocab file.
@@ -27,13 +27,13 @@ class Model(Small_LLM_Model):
             other error occurs while scanning it -- every exception raised
             while loading is converted to `GenerationError`.
         """
-        self.__string_end_sequences = []
+        self.__string_end_sequences = set()
         try:
             with open(self.get_path_to_vocab_file()) as vocab_file:
                 vocab_dict: Dict[str, int] = json.loads(vocab_file.read())
             for key, token_id in vocab_dict.items():
                 if re.search(r'(?<!\\)"', key):
-                    self.__string_end_sequences.append(token_id)
+                    self.__string_end_sequences.add(token_id)
         except IOError as e:
             raise GenerationError(f"Failed to open vocab file: {e}")
         except DeserializationException as e:
@@ -45,7 +45,7 @@ class Model(Small_LLM_Model):
             )
 
     @property
-    def string_end_sequences(self) -> List[int]:
+    def string_end_sequences(self) -> Set[int]:
         """list of int : Token ids whose text contains an unescaped `"`.
 
         Computed once from the vocab file and cached.

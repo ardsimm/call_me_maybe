@@ -43,5 +43,5 @@ class StringState(State):
         }
         self._stage_transition_tokens = {
             StringStateStage.INITIAL: [],
-            StringStateStage.DATA: string_end_sequences,
+            StringStateStage.DATA: list(string_end_sequences),
         }

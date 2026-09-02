@@ -57,7 +57,6 @@ class Trie:
             for token in word:
                 current.setdefault(token, {})
                 current = current[token]
-            current[END_OF_BRANCH] = {}
             for end_sequence in Model.get_instance().string_end_sequences:
                 current.setdefault(end_sequence, {})
 
@@ -67,16 +66,26 @@ class Trie:
     ) -> Optional[List[int]]:
         tokens: List[int] = []
         curr_node: Optional[TrieNode] = node
-        while (
-            curr_node is not None
-            and curr_node.get(END_OF_BRANCH) is None
-        ):
-            if len(curr_node.keys()) > 1:
+        while curr_node is not None:
+            filtered_keys = (
+                set(curr_node.keys())
+                - Model.get_instance().string_end_sequences
+            )
+            filtered_keys_len = len(filtered_keys)
+            full_keys_len = len(curr_node.keys())
+            if (
+                filtered_keys_len > 1
+                or (
+                    filtered_keys_len == 1
+                    and filtered_keys_len != full_keys_len
+                )
+            ):
                 return None
-            if len(curr_node.keys()) == 0:
+            if filtered_keys_len == 0:
                 curr_node = None
             else:
-                tokens.append(next(iter(curr_node.keys())))
-                curr_node = curr_node.get(next(iter(curr_node.keys())))
+                next_key = next(iter(filtered_keys))
+                tokens.append(next_key)
+                curr_node = curr_node.get(next_key)
         tokens.append(self.__quote_token)
         return tokens

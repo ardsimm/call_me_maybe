@@ -153,9 +153,10 @@ class GeneratorImpl(Generator):
         while token is not None and token_count < self.TOKEN_GEN_LIMIT:
             result.append(token)
             if isinstance(constrainer.state, TrieState):
-                trie_state: TrieState = constrainer.state
-                determinated_branch = trie_state.trie.get_determinated_branch(
-                    trie_state.current_node
+                determinated_branch = (
+                    constrainer.state.trie.get_determinated_branch(
+                        constrainer.state.current_node
+                    )
                 )
                 if determinated_branch is not None:
                     result.extend(determinated_branch)

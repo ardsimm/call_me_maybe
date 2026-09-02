@@ -53,7 +53,7 @@ class IntState(State):
             [],
         )
 
-        string_end_sequences = Model.get_instance().string_end_sequences
+        string_end_sequences = list(Model.get_instance().string_end_sequences)
 
         self._stage_allowed_tokens = {
             IntStateStage.INITIAL: self.minus_token + digits_tokens,
