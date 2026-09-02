@@ -95,13 +95,6 @@ class Context(BaseModel):
             errors: List[str] = []
             if name is None:
                 errors.append("Missing name in function")
-            if "\"" in name:
-                quote_index = name.index("\"")
-                if quote_index != -1 and (
-                    quote_index == 0
-                    or name[quote_index - 1] != "\\"
-                ):
-                    errors.append("Unescaped double quote in function name")
             if description is None:
                 errors.append("Missing description in function")
             if parameters is None:
@@ -110,6 +103,13 @@ class Context(BaseModel):
                 errors.append("Missing returns in function")
             if name is not None and not isinstance(name, str):
                 errors.append("Invalid type for name in function")
+            if isinstance(name, str) and "\"" in name:
+                quote_index = name.index("\"")
+                if quote_index != -1 and (
+                    quote_index == 0
+                    or name[quote_index - 1] != "\\"
+                ):
+                    errors.append("Unescaped double quote in function name")
             if description is not None and not isinstance(description, str):
                 errors.append("Invalid type for description in function")
             if parameters is not None and not isinstance(parameters, dict):
@@ -140,7 +140,13 @@ class Context(BaseModel):
         try:
             with open(arguments.input) as prompts:
                 prompts_dicts = json.loads(prompts.read())
+                if not isinstance(prompts_dicts, list):
+                    raise ParsingError("Prompts file must be a list")
                 for prompt_dict in prompts_dicts:
+                    if not isinstance(prompt_dict, dict):
+                        raise ParsingError(
+                            "Prompts file must be a list of dicts"
+                        )
                     prompt = prompt_dict.get("prompt")
                     if prompt is None or not isinstance(prompt, str):
                         raise ParsingError(
