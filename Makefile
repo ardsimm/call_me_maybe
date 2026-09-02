@@ -14,7 +14,7 @@ showcase: install
 install: $(VENV)
 
 debug: install
-	uv run python -m pdb src/__main__.py
+	uv run python -m pdb -m src
 
 test: install
 	uv run python -m tests
