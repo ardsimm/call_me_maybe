@@ -195,9 +195,6 @@ class CallMeMaybe:
                 try:
                     parameter.value = cls.__strip_number(parameter.value)
                     parsed_parameter = int(parameter.value)
-                    if math.isinf(parsed_parameter):
-                        # Python is a FAKE language made by CRAZY people
-                        raise ValueError("Int parameter overflowed")
                 except ValueError as err:
                     print(
                         f"Failed to generate int parameter {parameter.name}:",
@@ -231,7 +228,7 @@ class CallMeMaybe:
                         f"Failed to generate parameter {parameter.name}:",
                         f"Invalid boolean value :{parameter.value}",
                     )
-                    parsed_parameter = ""
+                    parsed_parameter = False
 
             else:
                 parsed_parameter = parameter.value
