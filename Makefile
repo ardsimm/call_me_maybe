@@ -8,6 +8,9 @@ $(VENV): pyproject.toml
 run: install
 	uv run python -m src
 
+showcase: install
+	uv run python -m src --input data/input/function_calling_showcase.json
+
 install: $(VENV)
 
 debug: install
@@ -51,17 +54,17 @@ flake8: install
 
 mypy: install
 	echo Running Mypy
-	uv run python -m mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV);
+	uv run python -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude $(VENV) --exclude tests
 
 lint: install flake8 mypy
 
 mypy-strict: install
 	echo Running Mypy
-	uv run python -m mypy . --strict --exclude $(VENV)
+	uv run python -m mypy . --strict --exclude $(VENV) --exclude tests
 
 lint-strict: flake8 mypy-strict
 
 black: install
 	uv run python -m black --line-length 79 .
 
-.phony: install run debug test build build-test re re-test re-deps clean fclean flake8 mypy lint mypy-strict lint-strict black
+.phony: install run debug test build build-test re re-test re-deps clean fclean flake8 mypy lint mypy-strict lint-strict black showcase

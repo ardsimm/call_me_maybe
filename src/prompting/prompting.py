@@ -6,13 +6,6 @@ from src.prompting.__templates import PromptingTemplates
 class Prompting:
     """Builds the chat-template-style prompt strings fed to the model."""
 
-    __context_prompt = """<|im_start|>system
-You are an assistant for Python function calling.
-
-Given a user request, select the appropriate function and determine the \
-concrete values required for its parameters.
-<|im_end|>"""
-
     @classmethod
     def build_name_generation_prompt(
         cls, user_prompt: str, functions: List[Function]
@@ -37,13 +30,8 @@ concrete values required for its parameters.
             Forwarded from `PromptingTemplates.get_function_name_template`
             if the template files cannot be loaded.
         """
-        return "\n\n".join(
-            [
-                cls.__context_prompt,
-                PromptingTemplates.get_function_name_template(
-                    user_prompt, functions
-                ),
-            ]
+        return PromptingTemplates.get_function_name_template(
+            user_prompt, functions
         )
 
     @classmethod
@@ -74,13 +62,8 @@ concrete values required for its parameters.
             `PromptingTemplates.get_function_parameters_template` if the
             template files cannot be loaded.
         """
-        return "\n\n".join(
-            [
-                cls.__context_prompt,
-                PromptingTemplates.get_function_parameters_template(
+        return PromptingTemplates.get_function_parameters_template(
                     user_prompt, picked_function
-                ),
-            ]
         )
 
     @classmethod
