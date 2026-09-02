@@ -91,6 +91,13 @@ class Context(BaseModel):
             errors: List[str] = []
             if name is None:
                 errors.append("Missing name in function")
+            if "\"" in name:
+                quote_index = name.index("\"")
+                if quote_index != -1 and (
+                    quote_index == 0
+                    or name[quote_index - 1] != "\\"
+                ):
+                    errors.append("Unescaped double quote in function name")
             if description is None:
                 errors.append("Missing description in function")
             if parameters is None:
