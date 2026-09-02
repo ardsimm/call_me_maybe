@@ -18,6 +18,7 @@ prompt/parameter counts happens below.
 | 4 | Scientific notation support in `FloatState` (`metrics_4`) | 45 prompts / 102 params | 44/45 = 98% | 100/102 = 98% |
 | 5 | Trailing/embedded minus-sign robustness (`metrics_5`) | 45 prompts / 102 params | 44/45 = 98% | 100/102 = 98% (unchanged) |
 | 6 | **Speed milestone** - first four performance fixes (`metrics_6`) | 20-prompt hard set, timing only | not re-scored | not re-scored |
+| 7 | **Correctness milestone** - pre-push audit fixes (`metrics_7`) | 44 prompts / 98 params (scope changed) | 44/44 = 100% | 93/98 = 95% |
 
 Row 6 is a **speed** milestone and deliberately carries no accuracy figures: the 45-prompt scored
 suite was not re-run, so rows 0-5 remain the last measured accuracy. Its numbers are wall clock
@@ -25,6 +26,15 @@ suite was not re-run, so rows 0-5 remain the last measured accuracy. Its numbers
 passes (15.3% -> 0). One unscored defect was visible in its output -- a `recipient` value copied
 verbatim out of a few-shot example -- which is why the next round of prompt trimming must restore
 accuracy scoring rather than continue on timing alone.
+
+Row 7 restores accuracy scoring, but **its scope differs from rows 0-5** and the two are not
+apples-to-apples: the suite moved to `tests/test_cases/` and `ambiguous_and_adversarial` now skips
+7 prompts instead of scoring them, dropping the denominators from 45/102 to 44/98. Compare the
+percentages, not the fractions. The 5 parameter misses are the pre-existing ones from `metrics_4`;
+measured immediately before and after row 7's fixes on the same suite, accuracy was identical, so
+the correctness work cost nothing. Row 7's real result is elsewhere: 18 malformed-input shapes that
+previously crashed now exit cleanly, and a prefix-collision scenario that scored 0% (function names
+that were unreachable by construction) now scores 10/10.
 
 ## Reading the trend
 
