@@ -1,8 +1,8 @@
 from enum import StrEnum
 import os
 from typing import Dict, List, Optional
-from src.models.function import Function, Parameter, ParameterType
 from src.generate.generator_exceptions import GenerationError
+from src.models.context import Function, Parameter, ParameterType
 
 
 class TemplateDirectories(StrEnum):
@@ -190,7 +190,7 @@ class PromptingTemplates:
                         else "float"
                     ),
                 )
-                for parameter in function.parameters
+                for parameter in function.parameters.values()
             ]
         )
         return (

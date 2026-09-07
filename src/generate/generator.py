@@ -37,7 +37,9 @@ class Generator(ABC):
         return self.__tokenizer
 
     @abstractmethod
-    def generate_name(self, prompt: str, functions: List[Function]) -> str:
+    def generate_name(
+        self, prompt: str, functions: List[Function]
+    ) -> str:
         """Generate the name of the function `prompt` should call.
 
         Parameters

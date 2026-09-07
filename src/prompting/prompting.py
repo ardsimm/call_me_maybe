@@ -1,5 +1,5 @@
 from typing import List, Optional
-from src.models.function import Function, Parameter
+from src.models.context import Function, Parameter
 from src.prompting.__templates import PromptingTemplates
 
 
@@ -63,7 +63,7 @@ class Prompting:
             template files cannot be loaded.
         """
         return PromptingTemplates.get_function_parameters_template(
-                    user_prompt, picked_function
+            user_prompt, picked_function
         )
 
     @classmethod

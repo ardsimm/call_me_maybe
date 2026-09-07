@@ -1,4 +1,6 @@
+import json
 import math
+from pydantic_core import from_json
 
 from src.generate import GeneratorFactory
 from src.generate import GenerationError
@@ -123,7 +125,38 @@ class CallMeMaybe:
             is not valid JSON, or its content does not match the expected
             shape.
         """
-        return Context(arguments)
+        functions_json: str
+        prompts_json: str
+        try:
+            with (
+                open(arguments.functions_definition) as functions_definition,
+                open(arguments.input) as prompts,
+            ):
+                functions_json = functions_definition.read()
+                prompts_json = prompts.read()
+        except (OSError, json.JSONDecodeError) as err:
+            raise ParsingError(
+                f"Error while parsing functions definition:\n{err}"
+            )
+        try:
+            functions_dict_list = from_json(functions_json)
+            prompts_dict_list = from_json(prompts_json)
+            context = Context.model_validate(
+                {
+                    "functions": functions_dict_list,
+                    "prompts": prompts_dict_list,
+                }
+            )
+        except ValueError as e:
+            raise ParsingError(f"Failed to parse JSON input: {e}")
+        if len(context.prompts) and not len(context.functions):
+            raise ParsingError(
+                "Cannot compute prompts with an empty functions file"
+            )
+        for function in context.functions:
+            for parameter_name in function.parameters.keys():
+                function.parameters[parameter_name].name = parameter_name
+        return context
 
     @classmethod
     def __process_prompt(cls, prompt: str, context: Context) -> OutputItem:
@@ -187,7 +220,9 @@ class CallMeMaybe:
 
         picked_function = filtered_functions[0]
         item["name"] = picked_function.name
-        parameters = generator.generate_parameters(prompt, picked_function)
+        parameters = generator.generate_parameters(
+            prompt, picked_function
+        )
         for parameter in parameters:
             parsed_parameter: Union[int, float, str, bool]
             assert parameter.value is not None
@@ -238,7 +273,7 @@ class CallMeMaybe:
         print("Generated parameters:")
         for parameter in parameters:
             print(
-                f"- {parameter.name} <{parameter.type.value}>:",
+                f"- {parameter.name} <{parameter.type}>:",
                 f"[{item["parameters"][parameter.name]}]",
             )
 
@@ -265,9 +300,13 @@ class CallMeMaybe:
         items: List[OutputItem] = []
 
         for prompt in context.prompts:
-            item: OutputItem = {"prompt": prompt, "name": "", "parameters": {}}
+            item: OutputItem = {
+                "prompt": prompt.prompt,
+                "name": "[None]",
+                "parameters": {},
+            }
             try:
-                item = cls.__process_prompt(prompt, context)
+                item = cls.__process_prompt(prompt.prompt, context)
                 items.append(item)
             except GenerationError as err:
                 print(f"Error while generating prompt {prompt}:\n{err}")

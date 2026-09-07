@@ -357,19 +357,16 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
                 if graded_len > 0
                 else 0.0
             ):.2f
-        }%)"
+        }%)",
     )
     if param_checks_len:
-        print(
-            f"{param_correct}/{param_checks_len} params correct",
-            f"({
+        print(f"{param_correct}/{param_checks_len} params correct", f"({
                 (
                     100 * param_correct / param_checks_len
                     if param_checks_len > 0
                     else 0.0
                 ):.2f
-            }%)"
-        )
+            }%)")
     print("========================================================")
     print("========================================================")
 

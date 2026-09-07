@@ -2,7 +2,7 @@ from src.constrainer.constrainer import Constrainer
 from src.constrainer.constrainer_factory import ConstrainerFactory
 from src.prompting.prompting import Prompting
 from src.state import StateFactory, StateType, State
-from src.models.function import Parameter, ParameterType, Function
+from src.models.context import Parameter, ParameterType, Function
 from typing import List, Optional
 
 from src.state.__trie_state import TrieState
@@ -165,7 +165,9 @@ class GeneratorImpl(Generator):
             token_count += 1
         return self.tokenizer.decode(result[initial_len:])
 
-    def generate_name(self, prompt: str, functions: List[Function]) -> str:
+    def generate_name(
+        self, prompt: str, functions: List[Function]
+    ) -> str:
         """Generate the name of the function `prompt` should call.
 
         Decodes against a `TrieState` built from every candidate
@@ -249,7 +251,7 @@ class GeneratorImpl(Generator):
         prompt = Prompting.build_parameter_generation_prompt(
             user_prompt, function
         )
-        for parameter in function.parameters:
+        for parameter in function.parameters.values():
             parameter.value = None
             prompt = Prompting.build_next_parameter_generation_prompt(
                 prompt, function, parameter, last_parameter
