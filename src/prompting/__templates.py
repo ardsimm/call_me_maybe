@@ -8,8 +8,8 @@ from src.models.context import Function, Parameter, ParameterType
 class TemplateDirectories(StrEnum):
     """Directories holding the raw prompt template `.txt` files."""
 
-    FUNCTION_NAMES_PATH = ("data/templates/function_names",)
-    FUNCTION_PARAMETERS_PATH = "data/templates/function_parameters"
+    FUNCTION_NAMES_PATH = ("templates/function_names",)
+    FUNCTION_PARAMETERS_PATH = "templates/function_parameters"
 
 
 class FunctionNamesTemplates(StrEnum):
