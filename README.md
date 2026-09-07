@@ -38,7 +38,7 @@ Concretely, the tool:
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.12+
 - [uv](https://docs.astral.sh/uv/) for dependency management
 - The `llm_sdk` package, provided alongside this project and already checked into this repository
   next to `src/`
