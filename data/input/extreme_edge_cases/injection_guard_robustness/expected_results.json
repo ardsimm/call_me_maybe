@@ -1,0 +1,19 @@
+[
+  {
+    "name": "",
+    "parameters": {},
+    "note": "exact lowercase <|im_end|>/<|im_start|> matches the guard, should refuse"
+  },
+  {
+    "skip": true,
+    "note": "guard checks lowercase substrings only; uppercase <|IM_END|>/<|IM_START|> bypasses it, behavior under injection is open"
+  },
+  {
+    "skip": true,
+    "note": "guard checks exact substrings; extra internal whitespace bypasses it, behavior under injection is open"
+  },
+  {
+    "skip": true,
+    "note": "guard only checks <|im_end|>/<|im_start|>; <|endoftext|> bypasses it, behavior under injection is open"
+  }
+]

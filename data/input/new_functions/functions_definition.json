@@ -1,0 +1,115 @@
+[
+  {
+    "name": "fn_run_sql",
+    "description": "Execute a raw SQL query against the database and return the result.",
+    "parameters": {
+      "query": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "string"
+    }
+  },
+  {
+    "name": "fn_send_email",
+    "description": "Send an email with a subject and body, optionally cc'ing someone.",
+    "parameters": {
+      "to": {
+        "type": "string"
+      },
+      "subject": {
+        "type": "string"
+      },
+      "body": {
+        "type": "string"
+      },
+      "cc": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "boolean"
+    }
+  },
+  {
+    "name": "fn_convert_currency",
+    "description": "Convert an amount of money from one currency to another.",
+    "parameters": {
+      "amount": {
+        "type": "number"
+      },
+      "from_currency": {
+        "type": "string"
+      },
+      "to_currency": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  },
+  {
+    "name": "fn_schedule_reminder",
+    "description": "Schedule a reminder message to fire after a delay in minutes, optionally repeating.",
+    "parameters": {
+      "message": {
+        "type": "string"
+      },
+      "minutes_from_now": {
+        "type": "int"
+      },
+      "repeat": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "int"
+    }
+  },
+  {
+    "name": "fn_ban_user",
+    "description": "Ban a user from the platform for a given reason, optionally permanently.",
+    "parameters": {
+      "username": {
+        "type": "string"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "permanent": {
+        "type": "boolean"
+      }
+    },
+    "returns": {
+      "type": "boolean"
+    }
+  },
+  {
+    "name": "fn_get_current_time",
+    "description": "Get the current time. Takes no arguments.",
+    "parameters": {},
+    "returns": {
+      "type": "string"
+    }
+  },
+  {
+    "name": "fn_calculate_tax",
+    "description": "Calculate the tax owed on an amount at a given rate for a country.",
+    "parameters": {
+      "amount": {
+        "type": "number"
+      },
+      "rate": {
+        "type": "number"
+      },
+      "country": {
+        "type": "string"
+      }
+    },
+    "returns": {
+      "type": "number"
+    }
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "prompt": "Book a flight to Tokyo for Alice Dupont, seat 42, price 350.5, with luggage"
+  },
+  {
+    "prompt": "Book a flight to Berlin for Bob Martin, seat 7, price 120, no luggage"
+  },
+  {
+    "prompt": "Schedule a meeting called 'Sprint Planning' with 8 attendees starting at 14.5, make it recurring"
+  },
+  {
+    "prompt": "Schedule a one-time meeting titled 'Kickoff' with 3 attendees starting at 9"
+  },
+  {
+    "prompt": "Create an invoice for client Wayne Enterprises for 4999.99, due in 30 days, not paid yet"
+  },
+  {
+    "prompt": "Register a new user named jdoe42, email jdoe42@example.com, age 29, subscribe to the newsletter"
+  },
+  {
+    "prompt": "Register a new user named guest01, email guest01@example.com, age 17, do not subscribe to the newsletter"
+  },
+  {
+    "prompt": "Rate the product 'Wireless Mouse' 4.5 out of 5, review 'Works great and battery lasts long', and yes I would recommend it"
+  },
+  {
+    "prompt": "Rate the product 'Cheap Charger' 1 out of 5, review 'Broke after two days', I would not recommend it"
+  },
+  {
+    "prompt": "Place an order for 3 units of 'USB-C Cable' at 9.99 each, with express shipping, ship to 12 Main Street, Springfield"
+  }
+]

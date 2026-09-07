@@ -1,0 +1,67 @@
+[
+  {
+    "name": "fn_run_sql",
+    "parameters": { "query": "SELECT * FROM users WHERE name = 'Bob' AND age > 30;" }
+  },
+  {
+    "name": "fn_run_sql",
+    "parameters": { "query": "DROP TABLE users; -- oops" }
+  },
+  {
+    "name": "fn_send_email",
+    "parameters": {
+      "to": "jane@example.com",
+      "subject": "Quarterly Report",
+      "body": "Please find attached the Q3 numbers.",
+      "cc": "bob@example.com"
+    }
+  },
+  {
+    "name": "fn_convert_currency",
+    "parameters": { "amount": 100.0, "from_currency": "USD", "to_currency": "EUR" }
+  },
+  {
+    "name": "fn_convert_currency",
+    "parameters": { "amount": -50.5, "from_currency": "GBP", "to_currency": "JPY" }
+  },
+  {
+    "name": "fn_schedule_reminder",
+    "parameters": {
+      "message": "call the dentist",
+      "minutes_from_now": 30,
+      "repeat": false
+    }
+  },
+  {
+    "name": "fn_schedule_reminder",
+    "parameters": {
+      "message": "take medication",
+      "minutes_from_now": 60,
+      "repeat": true
+    }
+  },
+  {
+    "name": "fn_ban_user",
+    "parameters": {
+      "username": "troll_2000",
+      "reason": "spamming",
+      "permanent": true
+    }
+  },
+  {
+    "name": "fn_ban_user",
+    "parameters": {
+      "username": "noob123",
+      "reason": "being rude",
+      "permanent": false
+    }
+  },
+  {
+    "name": "fn_get_current_time",
+    "parameters": {}
+  },
+  {
+    "name": "fn_calculate_tax",
+    "parameters": { "amount": 5000.0, "rate": 0.2, "country": "Germany" }
+  }
+]

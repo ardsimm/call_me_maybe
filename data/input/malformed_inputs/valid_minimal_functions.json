@@ -1,0 +1,10 @@
+[
+  {
+    "name": "fn_ping",
+    "description": "Respond to a ping with no arguments.",
+    "parameters": {},
+    "returns": {
+      "type": "boolean"
+    }
+  }
+]

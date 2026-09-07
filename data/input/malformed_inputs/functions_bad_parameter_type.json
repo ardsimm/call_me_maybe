@@ -1,0 +1,12 @@
+[
+  {
+    "name": "fn_bad_param_type",
+    "description": "Uses a parameter type that is not in the supported enum.",
+    "parameters": {
+      "items": {
+        "type": "array"
+      }
+    },
+    "returns": { "type": "boolean" }
+  }
+]
