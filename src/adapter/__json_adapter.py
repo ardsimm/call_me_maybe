@@ -29,7 +29,7 @@ class JSONAdapter(Adapter):
         """
         dump: str
         try:
-            dump = json.dumps(value)
+            dump = json.dumps(value, indent=4)
         except TypeError as e:
             raise SerializationException(e)
         return dump
