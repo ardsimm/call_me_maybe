@@ -42,17 +42,63 @@ class CallMeMaybe:
         prompt: str,
         functions: List[Function]
     ) -> OutputItem:
-        return ({
-            "name": next(functions).name,
+        """Build a stand-in entry for a prompt that could not be generated.
+
+        The subject requires one output object per prompt, so a prompt
+        whose generation failed still contributes an entry rather than
+        being dropped. The first declared function is named because the
+        output's `name` must be one that exists in
+        `functions_definition.json`; its parameters are left empty,
+        since no value for them was ever generated.
+
+        Parameters
+        ----------
+        prompt : str
+            The user's natural-language request, echoed back unchanged.
+        functions : list of Function
+            The declared functions; must not be empty, which
+            `__get_context` already guarantees whenever there are
+            prompts to process.
+
+        Returns
+        -------
+        OutputItem
+            The prompt, the first function's name, and no parameters.
+        """
+        return {
+            "prompt": prompt,
+            "name": functions[0].name,
             "parameters": {},
-            "prompt": prompt
-        })
+        }
 
     @staticmethod
     def __sanitize_user_prompt(
         prompt: str,
         control_tokens: Optional[List[str]] = None
     ) -> str:
+        """Strip chat-template control tokens out of a user prompt.
+
+        The prompt is interpolated into a chat-template string, so a
+        prompt carrying `<|im_end|>`, `</think>` or similar can close
+        the current turn early and have the rest of its text read as
+        the model's own output instead of as a user request. Removing
+        them leaves a harmless prompt that still produces a real,
+        schema-valid function call, rather than refusing the prompt and
+        emitting an entry with no function name.
+
+        Parameters
+        ----------
+        prompt : str
+            The user's natural-language request.
+        control_tokens : list of str, optional
+            The tokens to remove; defaults to Qwen's chat-template and
+            reasoning markers.
+
+        Returns
+        -------
+        str
+            `prompt` with every control token removed.
+        """
         if control_tokens is None:
             control_tokens = [
                 "<|im_start|>",
@@ -366,7 +412,7 @@ class CallMeMaybe:
                 print(f"Error while generating prompt {prompt}:\n{err}")
                 items.append(cls.__get_placeholder_output_item(
                     functions=context.functions,
-                    prompt=prompt
+                    prompt=prompt.prompt,
                 ))
                 continue
         return items
