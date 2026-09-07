@@ -6,11 +6,12 @@ from src.generate import GeneratorFactory
 from src.generate import GenerationError
 from src.generate.generator_exceptions import FatalGenerationError
 from src.model.model import Model
+from src.models.context import Function
 from src.parsing import ParserFactory
 from src.models import Arguments, Context, OutputItem, ParameterType
 from src.adapter import AdapterFactory, AdapterType, SerializationException
 from src.parsing import ParsingError, ParsingValidationError
-from typing import List, Union
+from typing import List, Optional, Union
 import sys
 from pathlib import Path
 
@@ -35,6 +36,36 @@ class CallMeMaybe:
     prompts, generates a name and parameters per prompt, coerces each
     parameter to its declared type, and writes every result out as JSON.
     """
+
+    @staticmethod
+    def __get_placeholder_output_item(
+        prompt: str,
+        functions: List[Function]
+    ) -> OutputItem:
+        return ({
+            "name": next(functions).name,
+            "parameters": {},
+            "prompt": prompt
+        })
+
+    @staticmethod
+    def __sanitize_user_prompt(
+        prompt: str,
+        control_tokens: Optional[List[str]] = None
+    ) -> str:
+        if control_tokens is None:
+            control_tokens = [
+                "<|im_start|>",
+                "<|im_end|>",
+                "<|endoftext|>",
+                "<think>",
+                "</think>",
+                "<tool_call>",
+                "</tool_call>"
+            ]
+        for control_token in control_tokens:
+            prompt = prompt.replace(control_token, "")
+        return prompt
 
     @staticmethod
     def __strip_number(s: str) -> str:
@@ -174,10 +205,9 @@ class CallMeMaybe:
     def __process_prompt(cls, prompt: str, context: Context) -> OutputItem:
         """Generate a function call for a single `prompt`.
 
-        Guards against prompt injection by refusing any prompt containing
-        `<|im_end|>` or `<|im_start|>` (the chat template's special
-        tokens) outright, returning an empty `OutputItem` for it instead
-        of generating. Otherwise generates a name, resolves it against
+        Guards against prompt injection by sanitizing any prompt containing
+        the chat template's special tokens.
+        It then generates a name, resolves it against
         `context.functions`, generates its parameters, and coerces each
         parameter's raw string value to its declared `ParameterType`
         (`INT`/`FLOAT` values that fail to parse or overflow to infinity
@@ -221,11 +251,7 @@ class CallMeMaybe:
             "=" * LOG_SEPARATOR_LEN,
             sep="\n",
         )
-        if "<|im_end|>" in prompt or "<|im_start|>" in prompt:
-            # This.. this is proper anti prompt injection code right there
-            # OpenAI aint got nothing on me
-            print("Nice try, not computing this one :p")
-            return {"prompt": prompt, "name": "", "parameters": {}}
+        prompt = cls.__sanitize_user_prompt(prompt)
 
         name = generator.generate_name(prompt, context.functions)
 
@@ -338,6 +364,10 @@ class CallMeMaybe:
                 items.append(item)
             except GenerationError as err:
                 print(f"Error while generating prompt {prompt}:\n{err}")
+                items.append(cls.__get_placeholder_output_item(
+                    functions=context.functions,
+                    prompt=prompt
+                ))
                 continue
         return items
 
