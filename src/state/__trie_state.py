@@ -31,7 +31,7 @@ class TrieState(State):
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `Model.string_end_sequences` (via `Trie.init_trie`)
             if the vocab file cannot be loaded.
         """

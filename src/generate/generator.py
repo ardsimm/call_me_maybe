@@ -37,9 +37,7 @@ class Generator(ABC):
         return self.__tokenizer
 
     @abstractmethod
-    def generate_name(
-        self, prompt: str, functions: List[Function]
-    ) -> str:
+    def generate_name(self, prompt: str, functions: List[Function]) -> str:
         """Generate the name of the function `prompt` should call.
 
         Parameters
@@ -73,7 +71,7 @@ class Generator(ABC):
         Returns
         -------
         list of Parameter
-            One `Parameter` per `function.parameters`, in order, with
-            `value` set from generation.
+            One `Parameter` per entry of `function.parameters`, in
+            declaration order, with `value` set from generation.
         """
         pass

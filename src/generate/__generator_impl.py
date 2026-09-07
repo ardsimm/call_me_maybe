@@ -165,9 +165,7 @@ class GeneratorImpl(Generator):
             token_count += 1
         return self.tokenizer.decode(result[initial_len:])
 
-    def generate_name(
-        self, prompt: str, functions: List[Function]
-    ) -> str:
+    def generate_name(self, prompt: str, functions: List[Function]) -> str:
         """Generate the name of the function `prompt` should call.
 
         Decodes against a `TrieState` built from every candidate
@@ -188,8 +186,10 @@ class GeneratorImpl(Generator):
         Raises
         ------
         GenerationError
-            Forwarded from building the `TrieState` or from decoding
-            (see `__get_completion`).
+            Forwarded from decoding (see `__get_completion`).
+        FatalGenerationError
+            Forwarded from building the prompt (unreadable templates) or
+            the `TrieState` (unloadable vocab file).
         ValueError
             Forwarded from decoding (see `__get_completion`).
         """
@@ -214,9 +214,11 @@ class GeneratorImpl(Generator):
     ) -> List[Parameter]:
         """Generate a value for each of `function`'s parameters.
 
-        Parameters are generated in declaration order, one at a time,
-        each one's prompt threading every previously generated
-        parameter's value as context. The `State` used for each
+        Parameters are generated one at a time, in the order they are
+        declared in `functions_definition.json` (which
+        `function.parameters`, being a dict keyed by parameter name,
+        preserves), each one's prompt threading every previously
+        generated parameter's value as context. The `State` used for each
         parameter is picked from its `ParameterType`: `IntState`,
         `FloatState`, a `TrieState` over `"true"`/`"false"` for `BOOL`,
         or `StringState` otherwise.
@@ -231,15 +233,20 @@ class GeneratorImpl(Generator):
         Returns
         -------
         list of Parameter
-            One `Parameter` per `function.parameters`, in order, with
-            `value` set from generation and any escaped quotes in it
-            unescaped.
+            One `Parameter` per entry of `function.parameters`, in order,
+            with `value` set from generation and any escaped quotes in it
+            unescaped. These are fresh copies: the `Parameter` objects
+            held by `function` are also written to along the way, but the
+            returned ones carry the unescaped values.
 
         Raises
         ------
         GenerationError
-            Forwarded from building a `TrieState` (for `BOOL` parameters)
-            or from decoding (see `__get_completion`).
+            Forwarded from decoding (see `__get_completion`).
+        FatalGenerationError
+            Forwarded from building each parameter's prompt (unreadable
+            templates) or, for `BOOL` parameters, its `TrieState`
+            (unloadable vocab file).
         ValueError
             Forwarded from decoding (see `__get_completion`).
         """

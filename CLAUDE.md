@@ -42,9 +42,12 @@ adding new variants (e.g. a new `State`, `Adapter`, `Tokenizer`). Modules with d
 
 Entry point: `src/__main__.py` → `CallMeMaybe.run()` (`src/call_me_maybe.py`), which:
 1. Parses CLI args into `Arguments` (pydantic model, validated against the input JSON files at construction).
-2. Builds a `Context` (`src/models/context.py`) — loads and validates `functions_definition.json` into
-   `Function`/`Parameter` models, and the prompts file into a list of strings. Both files are strictly validated
-   (missing/extra keys, wrong types → `ParsingError`).
+2. Builds a `Context` in `CallMeMaybe.__get_context` — reads both files, decodes them with
+   `pydantic_core.from_json`, and validates them in one go via `Context.model_validate` against the models in
+   `src/models/context.py` (`Function`, `Parameter`, `Returns`, `PromptEntry`), every one of which sets
+   `extra="forbid"`, so missing/extra keys and wrong types are all caught by pydantic and re-raised as
+   `ParsingError`. Two things validation can't express are then done by hand: rejecting a non-empty prompts
+   file paired with an empty functions file, and copying each parameter's dict key into its `Parameter.name`.
 3. For each prompt, calls the `Generator` twice: `generate_name()` then `generate_parameters()`.
 4. Writes all `OutputItem`s (`{prompt, name, parameters}`) as one JSON array via `AdapterFactory` (JSON adapter).
 
@@ -74,8 +77,14 @@ This is the core of the project, spread across four cooperating layers:
   JSON strings regardless of type, then parsed back into the target Python type.
 
 When adding a new parameter type or output shape, the pattern is: add a `ParameterType` enum value
-(`src/models/function.py`), add/extend a `State` for it, wire it into `GeneratorImpl.generate_parameters`'s
-type dispatch, and update the final type-coercion switch in `CallMeMaybe.__process_prompt`.
+(`src/models/context.py`, which holds every input-file model), add/extend a `State` for it, wire it into
+`GeneratorImpl.generate_parameters`'s type dispatch, and update the final type-coercion switch in
+`CallMeMaybe.__process_prompt`.
+
+Generation failures come in two flavours (`src/generate/generator_exceptions.py`): `GenerationError` is
+per-prompt and recoverable (`__process_prompts` logs it, skips that prompt, and carries on, so a failed prompt
+contributes no output entry), while `FatalGenerationError` means nothing can ever generate (unloadable vocab
+file, missing `templates/` files) and propagates to `CallMeMaybe.run`, which aborts without writing output.
 
 ### Supporting layers
 
@@ -86,7 +95,9 @@ type dispatch, and update the final type-coercion switch in `CallMeMaybe.__proce
   requirement to eventually stop depending on the SDK's `encode`/`decode` and rebuild tokenization from
   `get_logits_from_input_ids`/`get_path_to_vocab_file` alone).
 - `src/prompting/` — builds the Qwen chat-template-style prompt strings (`__templates.py`) fed to the model for
-  name selection and each parameter in turn, threading the previously generated parameter as context.
+  name selection and each parameter in turn, threading the previously generated parameter as context. The raw
+  `.txt` templates live in the top-level `templates/` directory (`function_names/`, `function_parameters/`),
+  read relative to the working directory — they are program assets, not `data/` inputs.
 
 ## Claude-authored reports, todos, issues, and metrics
 

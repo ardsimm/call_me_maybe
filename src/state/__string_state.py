@@ -23,7 +23,7 @@ class StringState(State):
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `Model.string_end_sequences` if the vocab file
             cannot be loaded.
         """

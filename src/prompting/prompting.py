@@ -26,7 +26,7 @@ class Prompting:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `PromptingTemplates.get_function_name_template`
             if the template files cannot be loaded.
         """
@@ -57,7 +57,7 @@ class Prompting:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from
             `PromptingTemplates.get_function_parameters_template` if the
             template files cannot be loaded.
@@ -95,7 +95,7 @@ class Prompting:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from
             `PromptingTemplates.get_next_function_parameter_template` if
             the template files cannot be loaded.

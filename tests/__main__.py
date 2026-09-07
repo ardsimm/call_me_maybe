@@ -1,6 +1,6 @@
 """Runs every JSON test-case scenario and reports name/parameter accuracy.
 
-For each subdirectory of `claude/test_cases/` that has an
+For each subdirectory of `tests/test_cases/` that has an
 `expected_results.json`, runs `python -m src` against its
 `functions_definition.json`/`function_calling_tests.json` pair and
 compares the output to the expected function name and parameter values,
@@ -8,11 +8,11 @@ one entry per prompt in matching order. An expected entry with
 `"skip": true` (a genuinely ambiguous or adversarial prompt with no
 single correct answer) is run but excluded from the accuracy tally.
 
-Separately, every fixture pair under `claude/test_cases/malformed_inputs/`
+Separately, every fixture pair under `tests/test_cases/malformed_inputs/`
 is run to check that malformed input never crashes the program (exit
 code 0), per the subject's "no crash, graceful exit" requirement.
 
-A markdown report is written to `claude/test-reports/`, and a short
+A markdown report is written to `tests/test-reports/`, and a short
 summary is printed to stdout. No unit test framework is used -- this is
 a plain script driving the CLI exactly like a human tester would.
 """
@@ -255,7 +255,7 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
     Parameters
     ----------
     scenario_dir : Path
-        A subdirectory of `claude/test_cases/` containing
+        A subdirectory of `tests/test_cases/` containing
         `functions_definition.json`, `function_calling_tests.json`, and
         `expected_results.json`.
 
