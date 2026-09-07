@@ -1,0 +1,38 @@
+[
+  {
+    "name": "fn_send",
+    "description": "Send a plain text message to a recipient.",
+    "parameters": { "recipient": { "type": "string" } },
+    "returns": { "type": "int" }
+  },
+  {
+    "name": "fn_send_email",
+    "description": "Send an email to an address with a subject line.",
+    "parameters": {
+      "address": { "type": "string" },
+      "subject": { "type": "string" }
+    },
+    "returns": { "type": "int" }
+  },
+  {
+    "name": "fn_send_email_attachment",
+    "description": "Send an email with a file attached to it.",
+    "parameters": {
+      "address": { "type": "string" },
+      "filename": { "type": "string" }
+    },
+    "returns": { "type": "int" }
+  },
+  {
+    "name": "f",
+    "description": "A single-letter function that formats a number as currency.",
+    "parameters": { "amount": { "type": "number" } },
+    "returns": { "type": "string" }
+  },
+  {
+    "name": "fn",
+    "description": "Return the factorial of an integer.",
+    "parameters": { "n": { "type": "int" } },
+    "returns": { "type": "int" }
+  }
+]

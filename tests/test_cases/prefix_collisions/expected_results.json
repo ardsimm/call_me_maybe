@@ -1,0 +1,13 @@
+[
+  { "name": "fn_send", "parameters": { "recipient": "Marcus" } },
+  {
+    "name": "fn_send_email",
+    "parameters": { "address": "bob@corp.io", "subject": "Quarterly Report" }
+  },
+  {
+    "name": "fn_send_email_attachment",
+    "parameters": { "address": "alice@corp.io", "filename": "budget.xlsx" }
+  },
+  { "name": "f", "parameters": { "amount": 1999.99 } },
+  { "name": "fn", "parameters": { "n": 6 } }
+]

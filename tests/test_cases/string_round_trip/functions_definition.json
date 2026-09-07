@@ -1,0 +1,17 @@
+[
+  {
+    "name": "fn_echo",
+    "description": "Echo a piece of text back exactly as it was given.",
+    "parameters": { "text": { "type": "string" } },
+    "returns": { "type": "string" }
+  },
+  {
+    "name": "fn_write_file",
+    "description": "Write some content to a file at a given filesystem path.",
+    "parameters": {
+      "path": { "type": "string" },
+      "content": { "type": "string" }
+    },
+    "returns": { "type": "boolean" }
+  }
+]

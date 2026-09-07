@@ -1,0 +1,14 @@
+[
+  {
+    "name": "fn_echo",
+    "description": "Echo a piece of text back exactly as it was given.",
+    "parameters": { "text": { "type": "string" } },
+    "returns": { "type": "string" }
+  },
+  {
+    "name": "fn_store_int",
+    "description": "Store a whole number in the database.",
+    "parameters": { "n": { "type": "int" } },
+    "returns": { "type": "int" }
+  }
+]

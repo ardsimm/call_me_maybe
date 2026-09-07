@@ -1,0 +1,7 @@
+[
+  { "prompt": "Send a message to Marcus" },
+  { "prompt": "Send an email to bob@corp.io with the subject Quarterly Report" },
+  { "prompt": "Email alice@corp.io and attach the file budget.xlsx" },
+  { "prompt": "Format 1999.99 as currency" },
+  { "prompt": "What is the factorial of 6?" }
+]

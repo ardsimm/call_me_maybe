@@ -152,6 +152,48 @@ MALFORMED_CASES: List[MalformedCase] = [
         MALFORMED_DIR / "valid_minimal_prompts.json",
         MALFORMED_DIR / "output/does_not_exist.json",
     ),
+    MalformedCase(
+        "param_description_key",
+        "Parameter carrying a JSON-Schema 'description' key",
+        MALFORMED_DIR / "functions_param_description.json",
+        MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/param_description_key.json",
+    ),
+    MalformedCase(
+        "type_integer_alias",
+        "Parameter type spelled 'integer' instead of 'int'",
+        MALFORMED_DIR / "functions_type_integer.json",
+        MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/type_integer_alias.json",
+    ),
+    MalformedCase(
+        "function_required_key",
+        "Function carrying a JSON-Schema 'required' key",
+        MALFORMED_DIR / "functions_required_key.json",
+        MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/function_required_key.json",
+    ),
+    MalformedCase(
+        "functions_object_not_array",
+        "Functions file is a top-level object, not an array",
+        MALFORMED_DIR / "functions_object_not_array.json",
+        MALFORMED_DIR / "valid_minimal_prompts.json",
+        MALFORMED_DIR / "output/functions_object_not_array.json",
+    ),
+    MalformedCase(
+        "prompts_utf8_bom",
+        "Prompts file prefixed with a UTF-8 byte order mark",
+        MALFORMED_DIR / "valid_minimal_functions.json",
+        MALFORMED_DIR / "prompts_utf8_bom.json",
+        MALFORMED_DIR / "output/prompts_utf8_bom.json",
+    ),
+    MalformedCase(
+        "prompts_null",
+        "Prompts file containing a bare JSON null",
+        MALFORMED_DIR / "valid_minimal_functions.json",
+        MALFORMED_DIR / "prompts_null.json",
+        MALFORMED_DIR / "output/prompts_null.json",
+    ),
 ]
 
 
@@ -285,11 +327,18 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
         ROOT / "tests" / "output" / f"{scenario_dir.name}.json"
     )
 
+    # A prompt whose generation fails contributes no output entry at all,
+    # so the output array can be shorter than the input. Zipping the three
+    # lists positionally would then silently grade every later prompt
+    # against the wrong entry -- look each one up by its prompt instead.
+    actual_by_prompt: Dict[str, JSONObject] = {
+        str(item.get("prompt", "")): item for item in actual_items
+    }
+
     prompt_checks: List[PromptCheck] = []
-    for prompt_obj, expected, actual in zip(
-        prompts, expected_items, actual_items
-    ):
+    for prompt_obj, expected in zip(prompts, expected_items):
         prompt = str(prompt_obj.get("prompt", ""))
+        actual: JSONObject = actual_by_prompt.get(prompt, {})
         skipped = bool(expected.get("skip", False))
         expected_name = str(expected.get("name", ""))
         actual_name = str(actual.get("name", ""))
@@ -335,7 +384,7 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
 
     graded = [check for check in report.prompt_checks if not check.skipped]
     skipped_count = len(report.prompt_checks) - len(graded)
-    name_correct = sum(1 for check in graded if check.name_correct)
+    name_correct_count = sum(1 for check in graded if check.name_correct)
     param_checks = [
         parameter_check
         for check in graded
@@ -348,12 +397,12 @@ def evaluate_scenario(scenario_dir: Path) -> Optional[ScenarioReport]:
     print(f"Ran {graded_len} prompt" + ("s" if graded_len > 1 else ""))
     print(f"Ignored {skipped_count} prompts")
     print(
-        f"{name_correct}/{graded_len} name"
-        + ("s" if name_correct > 1 else "")
+        f"{name_correct_count}/{graded_len} name"
+        + ("s" if name_correct_count > 1 else "")
         + " correct",
         f"({
             (
-                100 * name_correct / graded_len
+                100 * name_correct_count / graded_len
                 if graded_len > 0
                 else 0.0
             ):.2f
