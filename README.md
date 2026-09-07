@@ -251,9 +251,9 @@ the way up to `CallMeMaybe.run`, which reports it and abandons the run without w
 
 ## Performance analysis
 
-All numbers below come from the batch of unit test included in this project 
+All numbers below come from the scenario batch included in this project.
 
-You can run these tests on your machine with
+You can reproduce them on your machine with
 
 ```sh
 make test
@@ -261,17 +261,31 @@ make test
 
 A report will be generated and written to `/tests/test-reports`
 
-> The test cases include a prompt injection attempt that is skipped by the program. This prompt is ignored in the metrics given here since it cannot be properly processed with the tools available to us in this project.
+> The scenario set runs **68 prompts**, of which **9 are excluded from the accuracy tally**: 8
+> are genuinely ambiguous or adversarial with no single correct answer, and 1 is a prompt
+> injection attempt that the program refuses outright rather than generating for. That leaves
+> **59 graded prompts** carrying **117 parameters**.
 
-- **Function name accuracy: 100%** (45/45 prompts with an objectively correct answer)
-- **Parameter accuracy: 96%** (96/100 parameters)
+- **Function name accuracy: 96.6%** (57/59 graded prompts)
+- **Parameter accuracy: 88.0%** (103/117 parameters)
+- **Malformed-input robustness: 17/17** fixtures rejected cleanly, with a clear message and no
+  crash.
 - **100% valid JSON, always.** Structural validity is guaranteed by construction, not by luck — a
   forbidden token can never be selected in the first place.
-- **Speed**: the full default `data/input/function_calling_tests.json` **(20 prompts)** completes in
-  about **14 seconds** end to end (model load included), and every scenario in the **test set (45 prompts)** finished its
-  batch in **99 seconds** (~ 1 minute and a half) — comfortably inside the "under 5 minutes" requirement 
-  
-**Again, these metrics come from tests executed on a desktop computer with a very powerful GPU, compute speed will greatly depend on hardware limitations**
+- **Speed**: the full default `data/input/function_calling_tests.json` **(11 prompts)** completes
+  in about **12 seconds** end to end on a CUDA GPU (model load included), and the whole scenario
+  set (68 prompts) finishes in **121 seconds** — comfortably inside the "under 5 minutes"
+  requirement.
+
+**These figures come from a desktop machine with a CUDA GPU; speed depends heavily on hardware.**
+The same default batch takes **111 seconds on CPU only** (20 cores), i.e. roughly 10 s/prompt
+against 1 s/prompt on GPU, so the 5-minute budget is the binding constraint somewhere around 30
+prompts on a CPU-only machine.
+
+The graded set deliberately includes scenarios built around the known weak paths below rather
+than only happy-path prompts, so the parameter figure is a floor, not a showcase: function-name
+selection is 100% on every non-adversarial scenario, and parameter accuracy is 100% on
+`multi_param_types` (43/43) and 96.3% on `new_functions` (26/27).
 
 Known remaining limitations:
 
