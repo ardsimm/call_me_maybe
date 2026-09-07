@@ -19,23 +19,7 @@ debug: install
 test: install
 	uv run python -m tests
 
-build: install
-	printf '#!/usr/bin/env bash\ncd "$$(dirname "$${BASH_SOURCE[0]}")"\nexec uv run python -m src "$$@"\n' > $(NAME)
-	chmod +x $(NAME)
-
-build-test: install
-	printf '#!/usr/bin/env bash\ncd "$$(dirname "$${BASH_SOURCE[0]}")"\nexec uv run python -m tests "$$@"\n' > $(TEST_NAME)
-	chmod +x $(TEST_NAME)
-
-re:
-	rm -f $(NAME)
-	$(MAKE) build
-
-re-test:
-	rm -f $(TEST_NAME)
-	$(MAKE) build-test
-
-re-deps: fclean install
+re: fclean install
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
@@ -67,4 +51,4 @@ lint-strict: flake8 mypy-strict
 black: install
 	uv run python -m black --line-length 79 .
 
-.phony: install run debug test build build-test re re-test re-deps clean fclean flake8 mypy lint mypy-strict lint-strict black showcase
+.phony: install run debug test re re-test re-deps clean fclean flake8 mypy lint mypy-strict lint-strict black showcase
