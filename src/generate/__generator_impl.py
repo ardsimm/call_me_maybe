@@ -1,3 +1,5 @@
+import json
+
 from src.constrainer.constrainer import Constrainer
 from src.constrainer.constrainer_factory import ConstrainerFactory
 from src.prompting.prompting import Prompting
@@ -68,21 +70,37 @@ class GeneratorImpl(Generator):
         """
         return completion[: self.__find_unescapted_quote_idx(completion)]
 
-    def __handle_escaped_quotes(self, completion: str) -> str:
-        """Unescape `\\"` sequences into plain `"` in `completion`.
+    def __decode_json_string(self, completion: str) -> str:
+        """Decode `completion` as the body of a JSON string.
+
+        Every value is generated as if it were the inside of a quoted
+        JSON string, so the model emits JSON escapes -- `\\"`, `\\\\`,
+        `\\n`, `\\t`, `\\uXXXX`. Wrapping the text back in quotes and
+        handing it to `json.loads` decodes all of them in one step;
+        replacing only `\\"` by hand would leave every other escape as
+        two literal characters, which `json.dumps` then doubles on the
+        way out.
 
         Parameters
         ----------
         completion : str
-            The stripped completion text, possibly containing escaped
-            quotes.
+            The stripped completion text, still carrying its JSON
+            escape sequences.
 
         Returns
         -------
         str
-            `completion` with every `\\"` replaced by `"`.
+            `completion` with every JSON escape sequence decoded. If it
+            is not a decodable string body -- a trailing lone backslash
+            or a truncated `\\uXXXX` escape, both of which the model can
+            produce -- the raw text is returned unchanged rather than
+            failing the prompt over a cosmetic problem.
         """
-        return completion.replace('\\"', '"')
+        try:
+            decoded = json.loads(f'"{completion}"')
+        except json.JSONDecodeError:
+            return completion
+        return decoded if isinstance(decoded, str) else completion
 
     def __get_next_token(
         self, result: List[int], constrainer: Constrainer
@@ -207,7 +225,7 @@ class GeneratorImpl(Generator):
                 )
             ),
         )
-        return self.__strip_completion(result)
+        return self.__decode_json_string(self.__strip_completion(result))
 
     def generate_parameters(
         self, prompt: str, function: Function
@@ -280,8 +298,9 @@ class GeneratorImpl(Generator):
                 prompt=prompt,
                 constrainer=ConstrainerFactory.get_instance(state),
             )
-            stripped_result = self.__strip_completion(result)
-            parameter.value = stripped_result
+            parameter.value = self.__decode_json_string(
+                self.__strip_completion(result)
+            )
             last_parameter = Parameter(
                 name=parameter.name, type=parameter.type, value=parameter.value
             )
@@ -289,7 +308,7 @@ class GeneratorImpl(Generator):
                 Parameter(
                     name=parameter.name,
                     type=parameter.type,
-                    value=self.__handle_escaped_quotes(parameter.value),
+                    value=parameter.value,
                 )
             )
 
