@@ -120,32 +120,6 @@ class PromptEntry(BaseModel):
     prompt: str = Field()
 
 
-class Functions(BaseModel):
-    """A list of `Function`s under a `functions` key.
-
-    Attributes
-    ----------
-    functions : list of Function
-        The parsed functions.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-    functions: List[Function]
-
-
-class Prompts(BaseModel):
-    """A list of `PromptEntry`s under a `prompts` key.
-
-    Attributes
-    ----------
-    prompts : list of PromptEntry
-        The parsed prompts.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-    prompts: List[PromptEntry]
-
-
 class Context(BaseModel):
     """The loaded, validated set of functions and prompts for a run.
 

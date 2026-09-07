@@ -14,14 +14,14 @@ class TemplateDirectories(StrEnum):
     pointed at, so they live outside `data/`.
     """
 
-    FUNCTION_NAMES_PATH = ("templates/function_names",)
+    FUNCTION_NAMES_PATH = "templates/function_names"
     FUNCTION_PARAMETERS_PATH = "templates/function_parameters"
 
 
 class FunctionNamesTemplates(StrEnum):
     """Filenames of the function-name-selection prompt templates."""
 
-    FUNCTION_NAME_MAIN = ("function_name_main_template.txt",)
+    FUNCTION_NAME_MAIN = "function_name_main_template.txt"
     FUNCTION_NAME_OPTIONS = "function_name_option_template.txt"
 
 

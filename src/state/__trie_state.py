@@ -82,8 +82,14 @@ class TrieState(State):
 
     @property
     def trie(self) -> Trie:
+        """
+        Getter for the trie attribute
+        """
         return self.__trie
 
     @property
     def current_node(self) -> TrieNode:
+        """
+        Getter for the current_node attribute
+        """
         return self.__current_node

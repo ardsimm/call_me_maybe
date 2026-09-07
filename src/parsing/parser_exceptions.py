@@ -19,6 +19,9 @@ class ParsingValidationError(ParsingError):
     """
 
     def __init__(self, validation_errors: List[ErrorDetails]):
+        """
+        Create a new ParsingValidationError with a list of ErrorDetails
+        """
         message = (
             f"{len(validation_errors)} "
             + "Validation error(s) occured during parsing:\n"
