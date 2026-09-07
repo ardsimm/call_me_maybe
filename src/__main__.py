@@ -1,5 +1,6 @@
 import sys
 from traceback import print_exception
+
 try:
     from src.call_me_maybe import CallMeMaybe
 except KeyboardInterrupt:
