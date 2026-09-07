@@ -51,4 +51,4 @@ lint-strict: flake8 mypy-strict
 black: install
 	uv run python -m black --line-length 79 .
 
-.phony: install run debug test re re-test re-deps clean fclean flake8 mypy lint mypy-strict lint-strict black showcase
+.PHONY: install run debug test re re-test re-deps clean fclean flake8 mypy lint mypy-strict lint-strict black showcase
