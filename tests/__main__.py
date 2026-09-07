@@ -238,6 +238,7 @@ def run_program(
     int
         The process's exit code.
     """
+    output_path.parent.mkdir(exist_ok=True, parents=True)
     stdout.parent.mkdir(exist_ok=True, parents=True)
     stderr.parent.mkdir(exist_ok=True, parents=True)
     with open(stdout, "w") as stdout_file, open(stderr, "w") as stderr_file:
