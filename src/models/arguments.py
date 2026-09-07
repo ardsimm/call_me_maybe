@@ -22,9 +22,5 @@ class Arguments(BaseModel):
     functions_definition: str = Field(
         default="data/input/functions_definition.json"
     )
-    input: str = Field(
-        default="data/input/function_calling_tests.json"
-    )
-    output: str = Field(
-        default="data/output/function_calling_results.json"
-    )
+    input: str = Field(default="data/input/function_calling_tests.json")
+    output: str = Field(default="data/output/function_calling_results.json")

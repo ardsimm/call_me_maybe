@@ -3,7 +3,6 @@ from src.model.model import Model
 from src.tokenize.tokenizer_factory import TokenizerFactory
 from src.tokenize.tokenizer_type import TokenizerType
 
-
 TrieNode = Dict[int, "TrieNode"]
 
 
@@ -31,9 +30,9 @@ class Trie:
         """
         self.__quote_token = cast(
             int,
-            TokenizerFactory.get_instance(
-                TokenizerType.DEFAULT
-            ).encode("\"").tolist()[0][0]
+            TokenizerFactory.get_instance(TokenizerType.DEFAULT)
+            .encode('"')
+            .tolist()[0][0],
         )
 
     @property
@@ -59,7 +58,7 @@ class Trie:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `Model.string_end_sequences` if the vocab file
             cannot be loaded.
         """
@@ -72,10 +71,7 @@ class Trie:
             for end_sequence in Model.get_instance().string_end_sequences:
                 current.setdefault(end_sequence, {})
 
-    def get_determinated_branch(
-        self,
-        node: TrieNode
-    ) -> Optional[List[int]]:
+    def get_determinated_branch(self, node: TrieNode) -> Optional[List[int]]:
         """Return the only completion left from `node`, if there is one.
 
         Walks down from `node` for as long as the path is forced, so a
@@ -115,7 +111,7 @@ class Trie:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `Model.string_end_sequences` if the vocab file
             cannot be loaded.
         """
@@ -128,12 +124,8 @@ class Trie:
             )
             filtered_keys_len = len(filtered_keys)
             full_keys_len = len(curr_node.keys())
-            if (
-                filtered_keys_len > 1
-                or (
-                    filtered_keys_len == 1
-                    and filtered_keys_len != full_keys_len
-                )
+            if filtered_keys_len > 1 or (
+                filtered_keys_len == 1 and filtered_keys_len != full_keys_len
             ):
                 return None
             if filtered_keys_len == 0:

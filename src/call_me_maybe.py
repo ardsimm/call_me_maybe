@@ -1,13 +1,17 @@
+import json
 import math
+from pydantic_core import from_json
 
 from src.generate import GeneratorFactory
 from src.generate import GenerationError
+from src.generate.generator_exceptions import FatalGenerationError
 from src.model.model import Model
+from src.models.context import Function
 from src.parsing import ParserFactory
 from src.models import Arguments, Context, OutputItem, ParameterType
 from src.adapter import AdapterFactory, AdapterType, SerializationException
 from src.parsing import ParsingError, ParsingValidationError
-from typing import List, Union
+from typing import List, Optional, Union
 import sys
 from pathlib import Path
 
@@ -32,6 +36,82 @@ class CallMeMaybe:
     prompts, generates a name and parameters per prompt, coerces each
     parameter to its declared type, and writes every result out as JSON.
     """
+
+    @staticmethod
+    def __get_placeholder_output_item(
+        prompt: str,
+        functions: List[Function]
+    ) -> OutputItem:
+        """Build a stand-in entry for a prompt that could not be generated.
+
+        The subject requires one output object per prompt, so a prompt
+        whose generation failed still contributes an entry rather than
+        being dropped. The first declared function is named because the
+        output's `name` must be one that exists in
+        `functions_definition.json`; its parameters are left empty,
+        since no value for them was ever generated.
+
+        Parameters
+        ----------
+        prompt : str
+            The user's natural-language request, echoed back unchanged.
+        functions : list of Function
+            The declared functions; must not be empty, which
+            `__get_context` already guarantees whenever there are
+            prompts to process.
+
+        Returns
+        -------
+        OutputItem
+            The prompt, the first function's name, and no parameters.
+        """
+        return {
+            "prompt": prompt,
+            "name": functions[0].name,
+            "parameters": {},
+        }
+
+    @staticmethod
+    def __sanitize_user_prompt(
+        prompt: str,
+        control_tokens: Optional[List[str]] = None
+    ) -> str:
+        """Strip chat-template control tokens out of a user prompt.
+
+        The prompt is interpolated into a chat-template string, so a
+        prompt carrying `<|im_end|>`, `</think>` or similar can close
+        the current turn early and have the rest of its text read as
+        the model's own output instead of as a user request. Removing
+        them leaves a harmless prompt that still produces a real,
+        schema-valid function call, rather than refusing the prompt and
+        emitting an entry with no function name.
+
+        Parameters
+        ----------
+        prompt : str
+            The user's natural-language request.
+        control_tokens : list of str, optional
+            The tokens to remove; defaults to Qwen's chat-template and
+            reasoning markers.
+
+        Returns
+        -------
+        str
+            `prompt` with every control token removed.
+        """
+        if control_tokens is None:
+            control_tokens = [
+                "<|im_start|>",
+                "<|im_end|>",
+                "<|endoftext|>",
+                "<think>",
+                "</think>",
+                "<tool_call>",
+                "</tool_call>"
+            ]
+        for control_token in control_tokens:
+            prompt = prompt.replace(control_token, "")
+        return prompt
 
     @staticmethod
     def __strip_number(s: str) -> str:
@@ -103,7 +183,17 @@ class CallMeMaybe:
 
     @staticmethod
     def __get_context(arguments: Arguments) -> Context:
-        """Build the run `Context` from `arguments`.
+        """Load and validate both input files into a run `Context`.
+
+        Reads the two files, decodes them with `pydantic_core.from_json`,
+        and hands the result to `Context.model_validate`, so the whole
+        shape check (missing keys, wrong types, extra keys via
+        `extra="forbid"`) is pydantic's rather than hand-written. Two
+        things are then fixed up afterwards, since neither can come from
+        validation alone: an empty functions file paired with a non-empty
+        prompts file is rejected, and every `Parameter.name` is set from
+        the key it was declared under in its function's `parameters`
+        object.
 
         Parameters
         ----------
@@ -119,25 +209,56 @@ class CallMeMaybe:
         Raises
         ------
         ParsingError
-            Forwarded from `Context.__init__` if a file cannot be opened,
-            is not valid JSON, or its content does not match the expected
-            shape.
+            If either file cannot be opened, is not valid JSON, does not
+            match the shape the models in `src/models/context.py`
+            describe (wrapping the `pydantic.ValidationError`), or if
+            there are prompts to process but no functions to choose from.
         """
-        return Context(arguments)
+        functions_json: str
+        prompts_json: str
+        try:
+            with (
+                open(arguments.functions_definition) as functions_definition,
+                open(arguments.input) as prompts,
+            ):
+                functions_json = functions_definition.read()
+                prompts_json = prompts.read()
+        except (OSError, json.JSONDecodeError) as err:
+            raise ParsingError(
+                f"Error while parsing functions definition:\n{err}"
+            )
+        try:
+            functions_dict_list = from_json(functions_json)
+            prompts_dict_list = from_json(prompts_json)
+            context = Context.model_validate(
+                {
+                    "functions": functions_dict_list,
+                    "prompts": prompts_dict_list,
+                }
+            )
+        except ValueError as e:
+            raise ParsingError(f"Failed to parse JSON input: {e}")
+        if len(context.prompts) and not len(context.functions):
+            raise ParsingError(
+                "Cannot compute prompts with an empty functions file"
+            )
+        for function in context.functions:
+            for parameter_name in function.parameters.keys():
+                function.parameters[parameter_name].name = parameter_name
+        return context
 
     @classmethod
     def __process_prompt(cls, prompt: str, context: Context) -> OutputItem:
         """Generate a function call for a single `prompt`.
 
-        Guards against prompt injection by refusing any prompt containing
-        `<|im_end|>` or `<|im_start|>` (the chat template's special
-        tokens) outright, returning an empty `OutputItem` for it instead
-        of generating. Otherwise generates a name, resolves it against
+        Guards against prompt injection by sanitizing any prompt containing
+        the chat template's special tokens.
+        It then generates a name, resolves it against
         `context.functions`, generates its parameters, and coerces each
         parameter's raw string value to its declared `ParameterType`
         (`INT`/`FLOAT` values that fail to parse or overflow to infinity
         fall back to `42`/`42.0`; an unrecognized `BOOL` value falls back
-        to `""`).
+        to `False`).
 
         Parameters
         ----------
@@ -156,6 +277,12 @@ class CallMeMaybe:
         GenerationError
             If the generated name matches none of `context.functions`, or
             forwarded from `Generator.generate_name`/`generate_parameters`.
+        FatalGenerationError
+            Forwarded from `Generator.generate_name`/`generate_parameters`
+            if the vocab file or the prompt template files cannot be
+            loaded. Unlike `GenerationError` this is not recoverable for
+            any later prompt, and is left to propagate past
+            `__process_prompts` up to `run`.
         ValueError
             Forwarded from `Generator.generate_name`/`generate_parameters`.
         """
@@ -170,11 +297,7 @@ class CallMeMaybe:
             "=" * LOG_SEPARATOR_LEN,
             sep="\n",
         )
-        if "<|im_end|>" in prompt or "<|im_start|>" in prompt:
-            # This.. this is proper anti prompt injection code right there
-            # OpenAI aint got nothing on me
-            print("Nice try, not computing this one :p")
-            return {"prompt": prompt, "name": "", "parameters": {}}
+        prompt = cls.__sanitize_user_prompt(prompt)
 
         name = generator.generate_name(prompt, context.functions)
 
@@ -238,7 +361,7 @@ class CallMeMaybe:
         print("Generated parameters:")
         for parameter in parameters:
             print(
-                f"- {parameter.name} <{parameter.type.value}>:",
+                f"- {parameter.name} <{parameter.type}>:",
                 f"[{item["parameters"][parameter.name]}]",
             )
 
@@ -249,8 +372,12 @@ class CallMeMaybe:
         """Generate a function call for every prompt in `context`.
 
         A `GenerationError` from any single prompt is caught and logged
-        so one bad prompt does not abort the whole batch; that prompt's
-        `OutputItem` is appended with an empty name and parameters.
+        so one bad prompt does not abort the whole batch; that prompt is
+        then skipped entirely, contributing no `OutputItem` at all, so
+        the result can be shorter than `context.prompts`. A
+        `FatalGenerationError` is deliberately *not* caught here, since
+        it means no prompt can ever succeed: it propagates to `run`,
+        which aborts the batch.
 
         Parameters
         ----------
@@ -260,18 +387,33 @@ class CallMeMaybe:
         Returns
         -------
         list of OutputItem
-            One item per prompt in `context.prompts`, in order.
+            One item per successfully generated prompt, in
+            `context.prompts` order.
+
+        Raises
+        ------
+        FatalGenerationError
+            Forwarded from `Generator.generate_name`/
+            `generate_parameters` if the vocab file or the prompt
+            template files cannot be loaded.
         """
         items: List[OutputItem] = []
 
         for prompt in context.prompts:
-            item: OutputItem = {"prompt": prompt, "name": "", "parameters": {}}
+            item: OutputItem = {
+                "prompt": prompt.prompt,
+                "name": "[None]",
+                "parameters": {},
+            }
             try:
-                item = cls.__process_prompt(prompt, context)
+                item = cls.__process_prompt(prompt.prompt, context)
                 items.append(item)
             except GenerationError as err:
                 print(f"Error while generating prompt {prompt}:\n{err}")
-                items.append(item)
+                items.append(cls.__get_placeholder_output_item(
+                    functions=context.functions,
+                    prompt=prompt.prompt,
+                ))
                 continue
         return items
 
@@ -309,11 +451,16 @@ class CallMeMaybe:
     def run(cls) -> None:
         """Run the full pipeline: parse args, generate, write output.
 
-        Parsing/validation failures, an empty prompts file,
-        serialization failures, and output write failures are all caught
-        and logged here, returning early instead of propagating -- only
-        a `GenerationError` from an individual prompt's own failure is
-        handled earlier, in `__process_prompts`.
+        Parsing/validation failures, an empty prompts file, a
+        `FatalGenerationError`, serialization failures, and output write
+        failures are all caught and logged here, returning early instead
+        of propagating -- only a `GenerationError` from an individual
+        prompt's own failure is handled earlier, in `__process_prompts`.
+        The two generation errors are split precisely along that line: a
+        `GenerationError` dooms one prompt and is recovered from per
+        prompt, while a `FatalGenerationError` (an unloadable vocab file
+        or missing prompt templates) dooms every prompt, so the whole run
+        is abandoned without writing an output file.
 
         Raises
         ------
@@ -333,7 +480,11 @@ class CallMeMaybe:
             return
         # Pre-load model weigths
         Model.get_instance()
-        items: List[OutputItem] = cls.__process_prompts(context)
+        try:
+            items: List[OutputItem] = cls.__process_prompts(context)
+        except FatalGenerationError as e:
+            print(f"An error occured during generation: {e}")
+            return
         try:
             cls.__write_output(items, arguments)
         except SerializationException as e:

@@ -1,0 +1,45 @@
+[
+  {
+    "name": "fn_echo",
+    "parameters": {
+      "text": "C:\\Users\\admin\\Documents\\report.txt"
+    }
+  },
+  {
+    "name": "fn_echo",
+    "parameters": {
+      "text": "a backslash \\ on its own"
+    }
+  },
+  {
+    "name": "fn_echo",
+    "parameters": {
+      "text": "{\"a\": 1, \"b\": [2, 3]}"
+    }
+  },
+  {
+    "name": "fn_echo",
+    "parameters": {
+      "text": "he said \"stop\" and then left"
+    }
+  },
+  {
+    "name": "fn_write_file",
+    "parameters": {
+      "path": "/tmp/notes.txt",
+      "content": "line one\nline two"
+    }
+  },
+  {
+    "name": "fn_echo",
+    "parameters": {
+      "text": "50% off -- use code SAVE\\50"
+    }
+  },
+  {
+    "name": "fn_echo",
+    "parameters": {
+      "text": "Chapter one begins here and continues at length so that the value clearly exceeds the sixty-seven token generation cap imposed by the constrained decoder, repeating steadily so that any premature cut is obvious in the diff rather than subtle, and carrying on well past the three hundred and seventy character mark where truncation has been measured to occur in practice, right up to this final full stop."
+    }
+  }
+]

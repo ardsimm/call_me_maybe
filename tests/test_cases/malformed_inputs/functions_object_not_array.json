@@ -1,0 +1,1 @@
+{"functions": [{"name": "fn_greet", "description": "Greet someone.", "parameters": {"name": {"type": "string"}}, "returns": {"type": "string"}}]}

@@ -31,7 +31,7 @@ class TrieState(State):
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `Model.string_end_sequences` (via `Trie.init_trie`)
             if the vocab file cannot be loaded.
         """
@@ -82,8 +82,14 @@ class TrieState(State):
 
     @property
     def trie(self) -> Trie:
+        """
+        Getter for the trie attribute
+        """
         return self.__trie
 
     @property
     def current_node(self) -> TrieNode:
+        """
+        Getter for the current_node attribute
+        """
         return self.__current_node

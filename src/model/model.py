@@ -3,7 +3,7 @@ import re
 from typing import Dict, Optional, Set
 from llm_sdk import Small_LLM_Model
 from src.adapter.adapter_exceptions import DeserializationException
-from src.generate.generator_exceptions import GenerationError
+from src.generate.generator_exceptions import FatalGenerationError
 
 
 class Model(Small_LLM_Model):
@@ -22,10 +22,11 @@ class Model(Small_LLM_Model):
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             If the vocab file cannot be opened, read, or parsed, or if any
             other error occurs while scanning it -- every exception raised
-            while loading is converted to `GenerationError`.
+            while loading is converted to `FatalGenerationError`, since
+            without these sequences no prompt at all can be generated.
         """
         self.__string_end_sequences = set()
         try:
@@ -35,11 +36,11 @@ class Model(Small_LLM_Model):
                 if re.search(r'(?<!\\)"', key):
                     self.__string_end_sequences.add(token_id)
         except OSError as e:
-            raise GenerationError(f"Failed to open vocab file: {e}")
+            raise FatalGenerationError(f"Failed to open vocab file: {e}")
         except DeserializationException as e:
-            raise GenerationError(f"Failed to parse vocab file: {e}")
+            raise FatalGenerationError(f"Failed to parse vocab file: {e}")
         except Exception as e:
-            raise GenerationError(
+            raise FatalGenerationError(
                 "An unknown error occured while loading "
                 + f" string end sequences: {e}"
             )
@@ -52,7 +53,7 @@ class Model(Small_LLM_Model):
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `__load_string_end_sequences` on first access if
             the vocab file cannot be loaded.
         """

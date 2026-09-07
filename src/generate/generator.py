@@ -71,7 +71,7 @@ class Generator(ABC):
         Returns
         -------
         list of Parameter
-            One `Parameter` per `function.parameters`, in order, with
-            `value` set from generation.
+            One `Parameter` per entry of `function.parameters`, in
+            declaration order, with `value` set from generation.
         """
         pass

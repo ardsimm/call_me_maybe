@@ -1,8 +1,10 @@
+import json
+
 from src.constrainer.constrainer import Constrainer
 from src.constrainer.constrainer_factory import ConstrainerFactory
 from src.prompting.prompting import Prompting
 from src.state import StateFactory, StateType, State
-from src.models.function import Parameter, ParameterType, Function
+from src.models.context import Parameter, ParameterType, Function
 from typing import List, Optional
 
 from src.state.__trie_state import TrieState
@@ -68,21 +70,37 @@ class GeneratorImpl(Generator):
         """
         return completion[: self.__find_unescapted_quote_idx(completion)]
 
-    def __handle_escaped_quotes(self, completion: str) -> str:
-        """Unescape `\\"` sequences into plain `"` in `completion`.
+    def __decode_json_string(self, completion: str) -> str:
+        """Decode `completion` as the body of a JSON string.
+
+        Every value is generated as if it were the inside of a quoted
+        JSON string, so the model emits JSON escapes -- `\\"`, `\\\\`,
+        `\\n`, `\\t`, `\\uXXXX`. Wrapping the text back in quotes and
+        handing it to `json.loads` decodes all of them in one step;
+        replacing only `\\"` by hand would leave every other escape as
+        two literal characters, which `json.dumps` then doubles on the
+        way out.
 
         Parameters
         ----------
         completion : str
-            The stripped completion text, possibly containing escaped
-            quotes.
+            The stripped completion text, still carrying its JSON
+            escape sequences.
 
         Returns
         -------
         str
-            `completion` with every `\\"` replaced by `"`.
+            `completion` with every JSON escape sequence decoded. If it
+            is not a decodable string body -- a trailing lone backslash
+            or a truncated `\\uXXXX` escape, both of which the model can
+            produce -- the raw text is returned unchanged rather than
+            failing the prompt over a cosmetic problem.
         """
-        return completion.replace('\\"', '"')
+        try:
+            decoded = json.loads(f'"{completion}"')
+        except json.JSONDecodeError:
+            return completion
+        return decoded if isinstance(decoded, str) else completion
 
     def __get_next_token(
         self, result: List[int], constrainer: Constrainer
@@ -186,8 +204,10 @@ class GeneratorImpl(Generator):
         Raises
         ------
         GenerationError
-            Forwarded from building the `TrieState` or from decoding
-            (see `__get_completion`).
+            Forwarded from decoding (see `__get_completion`).
+        FatalGenerationError
+            Forwarded from building the prompt (unreadable templates) or
+            the `TrieState` (unloadable vocab file).
         ValueError
             Forwarded from decoding (see `__get_completion`).
         """
@@ -205,16 +225,18 @@ class GeneratorImpl(Generator):
                 )
             ),
         )
-        return self.__strip_completion(result)
+        return self.__decode_json_string(self.__strip_completion(result))
 
     def generate_parameters(
         self, prompt: str, function: Function
     ) -> List[Parameter]:
         """Generate a value for each of `function`'s parameters.
 
-        Parameters are generated in declaration order, one at a time,
-        each one's prompt threading every previously generated
-        parameter's value as context. The `State` used for each
+        Parameters are generated one at a time, in the order they are
+        declared in `functions_definition.json` (which
+        `function.parameters`, being a dict keyed by parameter name,
+        preserves), each one's prompt threading every previously
+        generated parameter's value as context. The `State` used for each
         parameter is picked from its `ParameterType`: `IntState`,
         `FloatState`, a `TrieState` over `"true"`/`"false"` for `BOOL`,
         or `StringState` otherwise.
@@ -229,15 +251,20 @@ class GeneratorImpl(Generator):
         Returns
         -------
         list of Parameter
-            One `Parameter` per `function.parameters`, in order, with
-            `value` set from generation and any escaped quotes in it
-            unescaped.
+            One `Parameter` per entry of `function.parameters`, in order,
+            with `value` set from generation and any escaped quotes in it
+            unescaped. These are fresh copies: the `Parameter` objects
+            held by `function` are also written to along the way, but the
+            returned ones carry the unescaped values.
 
         Raises
         ------
         GenerationError
-            Forwarded from building a `TrieState` (for `BOOL` parameters)
-            or from decoding (see `__get_completion`).
+            Forwarded from decoding (see `__get_completion`).
+        FatalGenerationError
+            Forwarded from building each parameter's prompt (unreadable
+            templates) or, for `BOOL` parameters, its `TrieState`
+            (unloadable vocab file).
         ValueError
             Forwarded from decoding (see `__get_completion`).
         """
@@ -249,7 +276,7 @@ class GeneratorImpl(Generator):
         prompt = Prompting.build_parameter_generation_prompt(
             user_prompt, function
         )
-        for parameter in function.parameters:
+        for parameter in function.parameters.values():
             parameter.value = None
             prompt = Prompting.build_next_parameter_generation_prompt(
                 prompt, function, parameter, last_parameter
@@ -271,8 +298,9 @@ class GeneratorImpl(Generator):
                 prompt=prompt,
                 constrainer=ConstrainerFactory.get_instance(state),
             )
-            stripped_result = self.__strip_completion(result)
-            parameter.value = stripped_result
+            parameter.value = self.__decode_json_string(
+                self.__strip_completion(result)
+            )
             last_parameter = Parameter(
                 name=parameter.name, type=parameter.type, value=parameter.value
             )
@@ -280,7 +308,7 @@ class GeneratorImpl(Generator):
                 Parameter(
                     name=parameter.name,
                     type=parameter.type,
-                    value=self.__handle_escaped_quotes(parameter.value),
+                    value=parameter.value,
                 )
             )
 

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from src.models.function import Function, Parameter
+from src.models.context import Function, Parameter
 from src.prompting.__templates import PromptingTemplates
 
 
@@ -26,7 +26,7 @@ class Prompting:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `PromptingTemplates.get_function_name_template`
             if the template files cannot be loaded.
         """
@@ -57,13 +57,13 @@ class Prompting:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from
             `PromptingTemplates.get_function_parameters_template` if the
             template files cannot be loaded.
         """
         return PromptingTemplates.get_function_parameters_template(
-                    user_prompt, picked_function
+            user_prompt, picked_function
         )
 
     @classmethod
@@ -95,7 +95,7 @@ class Prompting:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from
             `PromptingTemplates.get_next_function_parameter_template` if
             the template files cannot be loaded.

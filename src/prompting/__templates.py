@@ -1,21 +1,27 @@
 from enum import StrEnum
 import os
 from typing import Dict, List, Optional
-from src.models.function import Function, Parameter, ParameterType
-from src.generate.generator_exceptions import GenerationError
+from src.generate.generator_exceptions import FatalGenerationError
+from src.models.context import Function, Parameter, ParameterType
 
 
 class TemplateDirectories(StrEnum):
-    """Directories holding the raw prompt template `.txt` files."""
+    """Directories holding the raw prompt template `.txt` files.
 
-    FUNCTION_NAMES_PATH = ("data/templates/function_names",)
-    FUNCTION_PARAMETERS_PATH = "data/templates/function_parameters"
+    Paths are relative to the working directory the program is launched
+    from, and point at the top-level `templates/` directory -- the
+    templates are part of the program, not of the `data/` inputs it is
+    pointed at, so they live outside `data/`.
+    """
+
+    FUNCTION_NAMES_PATH = "templates/function_names"
+    FUNCTION_PARAMETERS_PATH = "templates/function_parameters"
 
 
 class FunctionNamesTemplates(StrEnum):
     """Filenames of the function-name-selection prompt templates."""
 
-    FUNCTION_NAME_MAIN = ("function_name_main_template.txt",)
+    FUNCTION_NAME_MAIN = "function_name_main_template.txt"
     FUNCTION_NAME_OPTIONS = "function_name_option_template.txt"
 
 
@@ -82,7 +88,7 @@ class PromptingTemplates:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Wrapping an `OSError` from `__load_templates` if a template
             file cannot be read.
         """
@@ -90,7 +96,7 @@ class PromptingTemplates:
             try:
                 cls.__load_templates()
             except OSError as e:
-                raise GenerationError(
+                raise FatalGenerationError(
                     f"Failed to load prompt template files: {e}"
                 )
         assert cls.__templates is not None
@@ -117,7 +123,7 @@ class PromptingTemplates:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `__get_templates` if a template file cannot
             be read.
         """
@@ -164,7 +170,7 @@ class PromptingTemplates:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `__get_templates` if a template file cannot
             be read.
         """
@@ -190,7 +196,7 @@ class PromptingTemplates:
                         else "float"
                     ),
                 )
-                for parameter in function.parameters
+                for parameter in function.parameters.values()
             ]
         )
         return (
@@ -237,7 +243,7 @@ class PromptingTemplates:
 
         Raises
         ------
-        GenerationError
+        FatalGenerationError
             Forwarded from `__get_templates` if a template file cannot
             be read.
         """

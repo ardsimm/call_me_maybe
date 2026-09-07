@@ -44,8 +44,8 @@ uv run python -m src \
   --output data/output/extreme_edge_cases.json
 
 uv run python -m src \
-  --functions_definition tests/test_cases/injection_guard_robustness/functions_definition.json \
-  --input tests/test_cases/injection_guard_robustness/function_calling_tests.json \
+  --functions_definition tests/test_cases/extreme_edge_cases/injection_guard_robustness/functions_definition.json \
+  --input tests/test_cases/extreme_edge_cases/injection_guard_robustness/function_calling_tests.json \
   --output data/output/injection_guard_robustness.json
 ```
 
@@ -71,6 +71,34 @@ uv run python -m src \
 case refuse cleanly instead. The underlying `FloatState` scientific-notation limitation that
 triggers it is still open -- see `claude/issues/issue_3_20260824-130008.md` and
 `claude/reports/report_4_20260824-125422.md`.
+
+```sh
+uv run python -m src \
+  --functions_definition tests/test_cases/prefix_collisions/functions_definition.json \
+  --input tests/test_cases/prefix_collisions/function_calling_tests.json \
+  --output data/output/prefix_collisions.json
+
+uv run python -m src \
+  --functions_definition tests/test_cases/string_round_trip/functions_definition.json \
+  --input tests/test_cases/string_round_trip/function_calling_tests.json \
+  --output data/output/string_round_trip.json
+
+uv run python -m src \
+  --functions_definition tests/test_cases/injection_variants/functions_definition.json \
+  --input tests/test_cases/injection_variants/function_calling_tests.json \
+  --output data/output/injection_variants.json
+```
+
+- `prefix_collisions`: function names that are strict prefixes of one another
+  (`f`, `fn`, `fn_send`, `fn_send_email`, `fn_send_email_attachment`), exercising the branch in
+  `Trie.get_determinated_branch` that must *not* short-circuit when one word ends where another
+  continues.
+- `string_round_trip`: string values whose text collides with JSON's own escaping -- Windows
+  paths and lone backslashes, embedded double quotes, a JSON object as literal text, a real
+  newline inside a value, and a value longer than `GeneratorImpl.TOKEN_GEN_LIMIT` tokens.
+- `injection_variants`: prompt-injection vectors the `<|im_start|>`/`<|im_end|>` guard does not
+  cover -- a bare `</think>` closing the assistant's reasoning block, `<|endoftext|>`, a
+  `<tool_call>` block, and the prompt-template's own `{[PLACEHOLDER]}` markers.
 
 ## Error-handling scenarios (malformed_inputs/)
 
@@ -147,4 +175,46 @@ uv run python -m src \
   --functions_definition tests/test_cases/malformed_inputs/does_not_exist.json \
   --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
   --output data/output/malformed_missing_file.json
+
+# Parameter carrying a JSON-Schema 'description' key
+uv run python -m src \
+  --functions_definition tests/test_cases/malformed_inputs/functions_param_description.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --output data/output/malformed_param_description.json
+
+# Parameter type spelled 'integer' instead of 'int'
+uv run python -m src \
+  --functions_definition tests/test_cases/malformed_inputs/functions_type_integer.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --output data/output/malformed_type_integer.json
+
+# Function carrying a JSON-Schema 'required' key
+uv run python -m src \
+  --functions_definition tests/test_cases/malformed_inputs/functions_required_key.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --output data/output/malformed_required_key.json
+
+# Functions file is a top-level object, not an array
+uv run python -m src \
+  --functions_definition tests/test_cases/malformed_inputs/functions_object_not_array.json \
+  --input tests/test_cases/malformed_inputs/valid_minimal_prompts.json \
+  --output data/output/malformed_object_not_array.json
+
+# Prompts file prefixed with a UTF-8 byte order mark
+uv run python -m src \
+  --functions_definition tests/test_cases/malformed_inputs/valid_minimal_functions.json \
+  --input tests/test_cases/malformed_inputs/prompts_utf8_bom.json \
+  --output data/output/malformed_utf8_bom.json
+
+# Prompts file containing a bare JSON null
+uv run python -m src \
+  --functions_definition tests/test_cases/malformed_inputs/valid_minimal_functions.json \
+  --input tests/test_cases/malformed_inputs/prompts_null.json \
+  --output data/output/malformed_prompts_null.json
 ```
+
+The last six fixtures are the schema-strictness cases: `extra="forbid"` plus the closed
+`ParameterType` enum means a `description` on a parameter, a `required` list on a function, or a
+`type` spelled `"integer"` rather than `"int"` each reject the *whole* functions file, so the run
+produces no output at all. That is graceful (clear message, exit 0, no crash) but it is worth
+knowing before a reviewer supplies their own function definitions.

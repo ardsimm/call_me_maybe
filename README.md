@@ -30,13 +30,15 @@ Concretely, the tool:
 - Loads a set of available functions from a JSON file.
 - Reads a list of natural-language prompts from another JSON file.
 - Picks the right function per prompt and extracts its parameter values under constrained decoding.
-- Writes every result as `{prompt, name, parameters}` to an output JSON file.
+- Writes every result as `{prompt, name, parameters}` to an output JSON file. A prompt whose
+  generation fails is reported and skipped rather than aborting the batch, so it contributes no
+  entry and the output can be shorter than the input.
 
 ## Instructions
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.12+
 - [uv](https://docs.astral.sh/uv/) for dependency management
 - The `llm_sdk` package, provided alongside this project and already checked into this repository
   next to `src/`
@@ -57,8 +59,13 @@ make run
 ```
 
 Reads `data/input/functions_definition.json` and `data/input/function_calling_tests.json`, and
-writes the results to `data/output/function_calls.json`. The first run downloads and caches
-`Qwen/Qwen3-0.6B` from the Hugging Face Hub.
+writes the results to `data/output/function_calling_results.json`. The first run downloads and
+caches `Qwen/Qwen3-0.6B` from the Hugging Face Hub.
+
+The prompt templates the model is fed live in the top-level `templates/` directory (one
+subdirectory per generation step, `function_names/` and `function_parameters/`), read relative to
+the working directory the program is launched from. They are part of the program, not of the
+`data/` inputs it is pointed at, and are not CLI-overridable.
 
 To use custom paths, run the module directly instead:
 
@@ -186,8 +193,16 @@ Each of the moving parts above maps to one layer of the codebase:
 - `Constrainer` (`src/constrainer/`) takes raw logits and a `State`, and picks
   `argmax(logits)` restricted to `state.get_allowed_tokens()` — this is the actual masking step.
 - `Generator` (`src/generate/`) drives the token-by-token loop, swapping in the right `State`/
-  `Constrainer` pair for whatever is being generated next, up to a hard cap of 500 tokens per value
+  `Constrainer` pair for whatever is being generated next, up to a hard cap of 67 tokens per value
   as a safety net.
+
+A failure during generation is one of two kinds, and the split decides how much of the run
+survives it. A `GenerationError` is local to one prompt (a forbidden token picked, a generated name
+matching no known function): it is caught per prompt, logged, and that prompt is skipped, so the
+output file simply carries no entry for it and the rest of the batch still runs. A
+`FatalGenerationError` means no prompt could ever succeed — the vocab file behind
+`string_end_sequences` is unreadable, or the `templates/` files are missing — so it propagates all
+the way up to `CallMeMaybe.run`, which reports it and abandons the run without writing any output.
 
 ## Design decisions
 
@@ -205,22 +220,40 @@ Each of the moving parts above maps to one layer of the codebase:
   only ever one model/tokenizer/adapter/generator per run; `StateFactory` and `ConstrainerFactory`
   return a fresh instance each time instead, since a state machine's whole point is to hold
   per-generation, mutable progress.
-- **A hard per-value token cap (`GeneratorImpl.TOKEN_GEN_LIMIT = 500`).** Every `State` is expected
+- **A hard per-value token cap (`GeneratorImpl.TOKEN_GEN_LIMIT = 67`).** Every `State` is expected
   to eventually signal completion on its own, but a cap guards against one that doesn't, keeping
   the "reasonable speed" requirement true by construction rather than by trusting every grammar.
 - **`Tokenizer` as its own swappable abstraction**, rather than calling `Model.encode`/`.decode`
   directly everywhere. Kept thin on purpose: the subject's bonus track asks for eventually rebuilding
   tokenization from `get_logits_from_input_ids`/`get_path_to_vocab_file` alone, without depending on
   the SDK's `encode`/`decode` — this seam is where that would slot in.
-- **Pydantic for every data-carrying class** (`Arguments`, `Function`, `Parameter`, `Context`), per
-  the subject's hard requirement — field constraints (`min_length=1`, etc.) double as the first
-  layer of input validation, before any file content is trusted.
+- **Pydantic for every data-carrying class** (`Arguments`, `Function`, `Parameter`, `Returns`,
+  `PromptEntry`, `Context`), per the subject's hard requirement.
+- **Input validation is pydantic's job, not hand-written code's.** Both input files are read, decoded
+  with `pydantic_core.from_json`, and handed straight to `Context.model_validate`, which is the only
+  thing that decides whether they are well-formed. `model_config = ConfigDict(extra="forbid")` on
+  every model in `src/models/context.py` is what makes an unexpected key anywhere in either file a
+  validation error, and a declared `type` outside `ParameterType` is rejected by the enum itself.
+  This replaced a long hand-rolled checking routine that walked both files key by key, accumulating
+  error strings — the same guarantees, in a fraction of the code, and with pydantic's own error
+  messages naming the exact offending path. Only two rules can't be expressed as a schema and are
+  still checked by hand afterwards, in `CallMeMaybe.__get_context`: that a non-empty prompts file
+  isn't paired with an empty functions file, and copying each parameter's key into its
+  `Parameter.name` (a parameter is keyed by its name in the JSON, so its own name isn't a field it
+  can be validated from).
+- **All the models in one module.** `Function`, `Parameter`, `ParameterType`, `Returns` and
+  `PromptEntry` live alongside `Context` in `src/models/context.py` rather than in a separate
+  `function.py`: they exist to describe exactly the two files a `Context` is built from, so
+  splitting them across modules only obscured that they are one schema.
+- **`Function.parameters` is a dict, not a list.** It mirrors the input file's own shape — an object
+  keyed by parameter name — so validation is a direct structural match instead of a translation
+  step, while insertion order still gives generation the declaration order it needs.
 
 ## Performance analysis
 
-All numbers below come from the batch of unit test included in this project 
+All numbers below come from the scenario batch included in this project.
 
-You can run these tests on your machine with
+You can reproduce them on your machine with
 
 ```sh
 make test
@@ -228,17 +261,31 @@ make test
 
 A report will be generated and written to `/tests/test-reports`
 
-> The test cases include a prompt injection attempt that is skipped by the program. This prompt is ignored in the metrics given here since it cannot be properly processed with the tools available to us in this project.
+> The scenario set runs **68 prompts**, of which **9 are excluded from the accuracy tally**: 8
+> are genuinely ambiguous or adversarial with no single correct answer, and 1 is a prompt
+> injection attempt that the program refuses outright rather than generating for. That leaves
+> **59 graded prompts** carrying **117 parameters**.
 
-- **Function name accuracy: 100%** (45/45 prompts with an objectively correct answer)
-- **Parameter accuracy: 96%** (96/100 parameters)
+- **Function name accuracy: 96.6%** (57/59 graded prompts)
+- **Parameter accuracy: 88.0%** (103/117 parameters)
+- **Malformed-input robustness: 17/17** fixtures rejected cleanly, with a clear message and no
+  crash.
 - **100% valid JSON, always.** Structural validity is guaranteed by construction, not by luck — a
   forbidden token can never be selected in the first place.
-- **Speed**: the full default `data/input/function_calling_tests.json` **(20 prompts)** completes in
-  about **14 seconds** end to end (model load included), and every scenario in the **test set (45 prompts)** finished its
-  batch in **99 seconds** (~ 1 minute and a half) — comfortably inside the "under 5 minutes" requirement 
-  
-**Again, these metrics come from tests executed on a desktop computer with a very powerful GPU, compute speed will greatly depend on hardware limitations**
+- **Speed**: the full default `data/input/function_calling_tests.json` **(11 prompts)** completes
+  in about **12 seconds** end to end on a CUDA GPU (model load included), and the whole scenario
+  set (68 prompts) finishes in **121 seconds** — comfortably inside the "under 5 minutes"
+  requirement.
+
+**These figures come from a desktop machine with a CUDA GPU; speed depends heavily on hardware.**
+The same default batch takes **111 seconds on CPU only** (20 cores), i.e. roughly 10 s/prompt
+against 1 s/prompt on GPU, so the 5-minute budget is the binding constraint somewhere around 30
+prompts on a CPU-only machine.
+
+The graded set deliberately includes scenarios built around the known weak paths below rather
+than only happy-path prompts, so the parameter figure is a floor, not a showcase: function-name
+selection is 100% on every non-adversarial scenario, and parameter accuracy is 100% on
+`multi_param_types` (43/43) and 96.3% on `new_functions` (26/27).
 
 Known remaining limitations:
 
@@ -302,8 +349,8 @@ make run
 ```
 
 Reads the default `data/input/functions_definition.json` and `data/input/function_calling_tests.json`,
-and writes an array of `{prompt, name, parameters}` objects to `data/output/function_calls.json`,
-one entry per prompt, e.g.:
+and writes an array of `{prompt, name, parameters}` objects to
+`data/output/function_calling_results.json`, one entry per successfully generated prompt, e.g.:
 
 ```json
 [
