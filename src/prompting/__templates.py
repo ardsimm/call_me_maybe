@@ -44,7 +44,7 @@ class PromptingTemplates:
 
         Raises
         ------
-        IOError
+        OSError
             If any template file under `TemplateDirectories` cannot be
             opened or read.
         """
@@ -83,13 +83,13 @@ class PromptingTemplates:
         Raises
         ------
         GenerationError
-            Wrapping an `IOError` from `__load_templates` if a template
+            Wrapping an `OSError` from `__load_templates` if a template
             file cannot be read.
         """
         if cls.__templates is None:
             try:
                 cls.__load_templates()
-            except IOError as e:
+            except OSError as e:
                 raise GenerationError(
                     f"Failed to load prompt template files: {e}"
                 )

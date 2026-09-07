@@ -339,7 +339,7 @@ class CallMeMaybe:
         except SerializationException as e:
             print(f"Failed to serialize result: {e}")
             return
-        except IOError as e:
+        except OSError as e:
             print(f"Failed to write output file: {e}")
             return
         print("\nDone ! :3")

@@ -34,7 +34,7 @@ class Model(Small_LLM_Model):
             for key, token_id in vocab_dict.items():
                 if re.search(r'(?<!\\)"', key):
                     self.__string_end_sequences.add(token_id)
-        except IOError as e:
+        except OSError as e:
             raise GenerationError(f"Failed to open vocab file: {e}")
         except DeserializationException as e:
             raise GenerationError(f"Failed to parse vocab file: {e}")

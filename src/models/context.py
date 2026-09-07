@@ -128,7 +128,7 @@ class Context(BaseModel):
                     name=name,
                     description=description,
                     parameters=[
-                        Parameter(name=key, type=ParameterType(value["type"]))
+                        Parameter(name=key, type=ParameterType(value.get("type")))
                         for key, value in parameters.items()
                     ],
                 )

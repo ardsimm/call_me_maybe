@@ -22,7 +22,7 @@ class StringState(State):
         """Build the allowed/transition token maps for string literals.
 
         Raises
-        ------
+        ------ 
         GenerationError
             Forwarded from `Model.string_end_sequences` if the vocab file
             cannot be loaded.
